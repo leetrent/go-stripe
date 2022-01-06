@@ -1,0 +1,2 @@
+# Create Go mod file:
+$ go mod init github.com/leetrent/go-stripe
