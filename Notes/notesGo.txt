@@ -1,2 +1,7 @@
 # Create Go mod file:
 $ go mod init github.com/leetrent/go-stripe
+
+# Import routing package:
+$ go get github.com/go-chi/chi/v5
+
+$ go run ./cmd/web
