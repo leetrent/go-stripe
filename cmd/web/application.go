@@ -35,6 +35,11 @@ func (app *application) serve() error {
 
 func (app *application) routes() http.Handler {
 	mux := chi.NewRouter()
+	mux.Get("/virtual-terminal", app.VirtualTerminal)
 	return mux
 
+}
+
+func (app *application) VirtualTerminal(w http.ResponseWriter, r *http.Request) {
+	app.infoLog.Println("[application][VirtualTerminal] => ()")
 }
