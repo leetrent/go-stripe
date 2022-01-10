@@ -38,8 +38,40 @@
 {{define "js"}} 
     <script src="https://js.stripe.com/v3"></script>
     <script>
+        let card;
+        let stripe = Stripe('pk_test_51KEmG3JxV5c4eSlbjMSzW69ht79i17P8luMgFxl8fyX3uFUKqeckTqxJTTLtgpktBGBCg3JYEnDzS0YisvMj1REX00J7vdvjyB');
         function val() {
             console.log("Charge Card button clicked");
         }
+
+        (function() {
+            // Create Stripe and elements
+            const elements = stripe.elements();
+            const style = {
+                base: {
+                    fontSize: '16px',
+                    lineHeight: '24px'
+                }
+            };
+
+            // Create card entry
+            card = elements.create('card', {
+                style: style,
+                hidePostalCode: false,
+            });           
+            card.mount("#card-element");
+
+            // Check for credit card input errors
+            card.addEventListener('change', function(event) {
+                var displayError = document.getElementById("card-errors");
+                if (event.error) {
+                    displayError.classList.remove('d-none');
+                    displayError.textContent = event.error.message;
+                } else {
+                    displayError.classList.add('d-none');
+                    displayError.textContent = '';
+                }
+            });
+        })();
     </script>
 {{end}}
