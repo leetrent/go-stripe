@@ -5,3 +5,15 @@ $ go mod init github.com/leetrent/go-stripe
 $ go get github.com/go-chi/chi/v5
 
 $ go run ./cmd/web
+
+# Import stripe:
+go get -u github.com/stripe/stripe-go/v72
+
+# Import CORS package:
+$ go get github.com/go-chi/cors
+
+# Compile and run API:
+$ go run ./cmd/api
+
+# Run in browser
+http://localhost:4001/api/payment-intent
