@@ -1,8 +1,8 @@
-package card
+package cards
 
 import (
-	"github.com/stripe/stripe-go/paymentintent"
 	"github.com/stripe/stripe-go/v72"
+	"github.com/stripe/stripe-go/v72/paymentintent"
 )
 
 type Card struct {

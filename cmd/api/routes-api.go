@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
@@ -8,6 +9,8 @@ import (
 )
 
 func (app *application) routes() http.Handler {
+	fmt.Println("[api][routes-api][routes] =>")
+
 	mux := chi.NewRouter()
 
 	mux.Use(cors.Handler(cors.Options{
@@ -18,6 +21,6 @@ func (app *application) routes() http.Handler {
 		MaxAge:           300,
 	}))
 
-	mux.Get("/api/payment-intent", app.GetPaymentIntent)
+	mux.Post("/api/payment-intent", app.GetPaymentIntent)
 	return mux
 }
