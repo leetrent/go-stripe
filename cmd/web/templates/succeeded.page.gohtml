@@ -7,10 +7,34 @@
 {{define "content"}}
     <h2 class="mt-5">Payment Succeeded</h2>
     <hr>
-    <p>Payment Intent: {{index .Data "paymentIntent"}}</p>
-    <p>Cardholder: {{index .Data "cardHolder"}}</p>
-    <p>Email: {{index .Data "email"}}</p> 
-    <p>Payment Method: {{index .Data "paymentMethod"}}</p>
-    <p>Payment Amount: {{index .Data "paymentAmount"}}</p>
-    <p>Currency: {{index .Data "paymentCurrency"}}</p>
+    <div class="container">  
+        <div class="row">
+            <div class="col">Payment Intent:</div>
+            <div class="col"> {{index .Data "paymentIntent"}}</div>
+        </div>
+        <div class="row">
+            <div class="col">Cardholder:</div>
+            <div class="col">{{index .Data "cardHolder"}}</div>
+        </div>
+        <div class="row">
+            <div class="col">Email:</div>
+            <div class="col">{{index .Data "email"}}</div>
+        </div>
+        <div class="row">
+            <div class="col">Payment Method:</div>
+            <div class="col">{{index .Data "paymentMethod"}}</div>
+        </div>
+        <div class="row">
+            <div class="col">Payment Amount:</div>
+            <div class="col">{{index .Data "paymentAmount"}}</div>
+        </div>
+        <div class="row">
+            <div class="col">Currency:</div>
+            <div class="col">{{index .Data "paymentCurrency"}}</div>
+        </div>
+        <div class="row">
+            <div class="col"></div>
+            <div class="col"></div>
+        </div>
+    </div>
 {{end}}
