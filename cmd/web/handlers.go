@@ -3,8 +3,16 @@ package main
 import "net/http"
 
 func (app *application) VirtualTerminal(w http.ResponseWriter, r *http.Request) {
-	app.infoLog.Println("[application][VirtualTerminal] => ()")
-	if err := app.renderTemplate(w, r, "terminal", nil); err != nil {
+	logSnippet := "[application][VirtualTerminal] =>"
+
+	app.infoLog.Printf("%s (%s)", logSnippet, app.config.stripe.key)
+
+	stringMap := make(map[string]string)
+	stringMap["publishable_key"] = app.config.stripe.key
+
+	if err := app.renderTemplate(w, r, "terminal", &templateData{
+		StringMap: stringMap,
+	}); err != nil {
 		app.errorLog.Println("[application][VirtualTerminal] => (error encounterd):")
 		app.errorLog.Println(err)
 	}
