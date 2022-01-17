@@ -3,7 +3,7 @@
     <script>
         let card;
         //let stripe = Stripe('pk_test_51KEmG3JxV5c4eSlbjMSzW69ht79i17P8luMgFxl8fyX3uFUKqeckTqxJTTLtgpktBGBCg3JYEnDzS0YisvMj1REX00J7vdvjyB');
-        let stripe = Stripe({{index .StringMap "publishable_key"}});
+        let stripe = Stripe({{.StripePublishableKey}});
         
         const cardMessages = document.getElementById("card-messages");
         const payButton = document.getElementById("pay-button");
