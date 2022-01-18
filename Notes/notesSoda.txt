@@ -1,2 +1,6 @@
 https://gobuffalo.io/en/docs/db/toolbox/
 
+# From project root:
+$ cd Database/migrations
+$ soda migrate
+
