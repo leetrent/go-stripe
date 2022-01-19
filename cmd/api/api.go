@@ -3,7 +3,6 @@ package main
 import (
 	"flag"
 	"fmt"
-	"html/template"
 	"log"
 	"net/http"
 	"os"
@@ -14,12 +13,10 @@ import (
 )
 
 const version = "1.0.0"
-const cssVersion = "1"
 
 type config struct {
 	port int
 	env  string
-	api  string
 	db   struct {
 		dsn string
 	}
@@ -30,12 +27,11 @@ type config struct {
 }
 
 type application struct {
-	config        config
-	infoLog       *log.Logger
-	errorLog      *log.Logger
-	templateCache map[string]*template.Template
-	version       string
-	DB            models.DBModel
+	config   config
+	infoLog  *log.Logger
+	errorLog *log.Logger
+	version  string
+	DB       models.DBModel
 }
 
 func (app *application) serve() error {
@@ -48,22 +44,20 @@ func (app *application) serve() error {
 		WriteTimeout:      5 * time.Second,
 	}
 
-	app.infoLog.Printf("Starting HTTP server in %s mode on port %d", app.config.env, app.config.port)
+	app.infoLog.Printf("Starting API server in %s mode on port %d", app.config.env, app.config.port)
 
 	return srv.ListenAndServe()
 }
-
 func main() {
 	var cfg config
 
-	flag.IntVar(&cfg.port, "port", 4000, "Server port to listen on")
-	flag.StringVar(&cfg.env, "env", "development", "Application environment {development|production}")
-	flag.StringVar(&cfg.db.dsn, "dsn", "", "DB Connection String")
-	flag.StringVar(&cfg.api, "api", "http://localhost:4001", "URL to API")
+	flag.IntVar(&cfg.port, "port", 4001, "Server port to listen on")
+	flag.StringVar(&cfg.env, "env", "development", "Application environment {development|production|maintenance}")
+	flag.StringVar(&cfg.db.dsn, "dsn", "not provided", "DB Connection String")
 
 	flag.Parse()
 
-	fmt.Printf("\n[web][main] => (cfg.db.dsn): %s\n", cfg.db.dsn)
+	fmt.Printf("\n[api][main] => (cfg.db.dsn): %s\n", cfg.db.dsn)
 
 	cfg.stripe.key = os.Getenv("STRIPE_KEY")
 	cfg.stripe.secret = os.Getenv("STRIPE_SECRET")
@@ -77,20 +71,16 @@ func main() {
 	}
 	defer conn.Close()
 
-	tc := make(map[string]*template.Template)
-
 	app := &application{
-		config:        cfg,
-		infoLog:       infoLog,
-		errorLog:      errorLog,
-		templateCache: tc,
-		version:       version,
-		DB:            models.DBModel{DB: conn},
+		config:   cfg,
+		infoLog:  infoLog,
+		errorLog: errorLog,
+		version:  version,
+		DB:       models.DBModel{DB: conn},
 	}
 
 	err = app.serve()
 	if err != nil {
-		app.errorLog.Println(err)
 		log.Fatal(err)
 	}
 }

@@ -1,0 +1,10 @@
+GRANT ALL ON widgets.* TO 'leetrent'@'%' IDENTIFIED BY 'Ca$eyPo0h';
+SET PASSWORD FOR 'leetrent'@localhost = PASSWORD("CaseyPo0h");
+
+
+$ go get github.com/go-sql-driver/mysql
+import (
+	"database/sql"
+
+	_ "github.com/go-sql-driver/mysql"
+)

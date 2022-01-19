@@ -1,0 +1,9 @@
+ # Test your String integration
+ https://stripe.com/docs/testing
+
+
+# Card declined
+ 4000 0000 0000 0002
+
+#
+4242 4242 4242 4242

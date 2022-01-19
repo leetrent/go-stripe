@@ -1,0 +1,40 @@
+{{template "base" . }}
+
+{{define "title"}}
+    Payment Succeeded! 
+{{end}}
+
+{{define "content"}}
+    <h2 class="mt-5">Payment Succeeded</h2>
+    <hr>
+    <div class="container">  
+        <div class="row">
+            <div class="col">Payment Intent:</div>
+            <div class="col"> {{index .Data "paymentIntent"}}</div>
+        </div>
+        <div class="row">
+            <div class="col">Cardholder:</div>
+            <div class="col">{{index .Data "cardHolder"}}</div>
+        </div>
+        <div class="row">
+            <div class="col">Email:</div>
+            <div class="col">{{index .Data "email"}}</div>
+        </div>
+        <div class="row">
+            <div class="col">Payment Method:</div>
+            <div class="col">{{index .Data "paymentMethod"}}</div>
+        </div>
+        <div class="row">
+            <div class="col">Payment Amount:</div>
+            <div class="col">{{index .Data "paymentAmount"}}</div>
+        </div>
+        <div class="row">
+            <div class="col">Currency:</div>
+            <div class="col">{{index .Data "paymentCurrency"}}</div>
+        </div>
+        <div class="row">
+            <div class="col"></div>
+            <div class="col"></div>
+        </div>
+    </div>
+{{end}}
