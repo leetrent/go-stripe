@@ -120,3 +120,44 @@ func (m *DBModel) GetWidget(id int) (Widget, error) {
 
 	return widget, nil
 }
+
+// InsertTransaction inserts a new row into the Transactions table
+// and returns the primary key for the newly created row and an
+// error (if any)
+func (m *DBModel) InsertTransaction(txn Transaction) (int, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	stmt := `
+		INSERT INTO transactions (
+			amount,
+			currency,
+			last_four,
+			bank_return_code,
+			transaction_status_id,
+			created_at,
+			updated_at
+		) 
+		VALUES (?, ?, ?, ?, ?, ?, ?)`
+
+	result, err := m.DB.ExecContext(ctx, stmt,
+		txn.Amount,
+		txn.Currency,
+		txn.LastFour,
+		txn.BankReturnCode,
+		txn.TransactionStatusId,
+		time.Now(),
+		time.Now(),
+	)
+
+	if err != nil {
+		return 0, err
+	}
+
+	id, err := result.LastInsertId()
+	if err != nil {
+		return 0, err
+	}
+
+	return int(id), nil
+}
