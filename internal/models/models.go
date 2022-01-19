@@ -38,7 +38,7 @@ type Widget struct {
 // Order is the type for all orders
 type Order struct {
 	ID            int       `json:"id"`
-	WidgetId      int       `json:"widget_id"`
+	WidgetID      int       `json:"widget_id"`
 	TransactionID int       `json:"transaction_id"`
 	StatusID      int       `json:"status_id"`
 	Quantity      int       `json:"quantity"`
@@ -70,7 +70,7 @@ type Transaction struct {
 	Currency            string    `json:"currency"`
 	LastFour            string    `json:"last_four"`
 	BankReturnCode      string    `json:"bank_return_code"`
-	TransactionStatusId int       `json:"transaction_status_id"`
+	TransactionStatusID int       `json:"transaction_status_id"`
 	CreatedAt           time.Time `json:"-"`
 	UpdatedAt           time.Time `json:"-"`
 }
@@ -145,7 +145,48 @@ func (m *DBModel) InsertTransaction(txn Transaction) (int, error) {
 		txn.Currency,
 		txn.LastFour,
 		txn.BankReturnCode,
-		txn.TransactionStatusId,
+		txn.TransactionStatusID,
+		time.Now(),
+		time.Now(),
+	)
+
+	if err != nil {
+		return 0, err
+	}
+
+	id, err := result.LastInsertId()
+	if err != nil {
+		return 0, err
+	}
+
+	return int(id), nil
+}
+
+// InsertOrder inserts a new row into the Transactions table
+// and returns the primary key for the newly created row and an
+// error (if any)
+func (m *DBModel) InsertOrder(order Order) (int, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	stmt := `
+		INSERT INTO orders (
+			widget_id,
+			transaction_id,
+			status_id,
+			quantity,
+			amount,
+			created_at,
+			updated_at
+		) 
+		VALUES (?, ?, ?, ?, ?, ?, ?)`
+
+	result, err := m.DB.ExecContext(ctx, stmt,
+		order.WidgetID,
+		order.TransactionID,
+		order.StatusID,
+		order.Quantity,
+		order.Amount,
 		time.Now(),
 		time.Now(),
 	)
