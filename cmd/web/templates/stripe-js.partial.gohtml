@@ -33,8 +33,9 @@
             cardMessages.innerText = "Credit card transaction was successful.";
         }
 
-        function val() {
-            console.log("Charge Card button clicked");
+        function val(amountToCharge) {
+            console.log("[stipe-js.partial][val] => (amountToCharge):", amountToCharge);
+
             let form = document.getElementById("charge_form");
 
             if (form.checkValidity() === false) {
@@ -46,8 +47,8 @@
 
             form.classList.add("was-validated");
             hidePayButton();
-            let amountToCharge = String(parseFloat(document.getElementById("amount").value) * 100)
-            console.log("amountToCharge:", amountToCharge);
+            //let amountToCharge = String(parseFloat(document.getElementById("amount").value) * 100)
+            //console.log("amountToCharge:", amountToCharge);
 
             let payload = {
                 amount: amountToCharge,
