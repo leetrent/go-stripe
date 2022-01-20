@@ -33,8 +33,16 @@
             <div class="col">{{index .Data "paymentCurrency"}}</div>
         </div>
         <div class="row">
-            <div class="col"></div>
-            <div class="col"></div>
+            <div class="col">Last Four:</div>
+            <div class="col">{{index .Data "last_four"}}</div>
+        </div>
+        <div class="row">
+            <div class="col">Bank Return Code:</div>
+            <div class="col">{{index .Data "bank_return_code"}}</div>
+        </div>
+        <div class="row">
+            <div class="col">Expiry Date:</div>
+            <div class="col">{{index .Data "expiry_month"}}/{{index .Data "expiry_year"}}</div>
         </div>
     </div>
 {{end}}
