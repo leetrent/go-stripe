@@ -7,3 +7,10 @@ $ soda migrate
 $ soda generate fizz AddImageToWidgets
 $ soda migrate
 
+$ soda generate fizz CreateCustomerTable
+$ soda generate fizz AddColumnsToTransactions
+$ soda migrate
+
+$ soda generate fizz AddCustomerIDToOrders
+$ soda migrate
+
