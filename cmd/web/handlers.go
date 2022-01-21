@@ -8,10 +8,18 @@ import (
 	"github.com/leetrent/go-stripe/internal/cards"
 )
 
+// Home displays the Home page
+func (app *application) Home(w http.ResponseWriter, r *http.Request) {
+
+	if err := app.renderTemplate(w, r, "home", &templateData{}); err != nil {
+		app.errorLog.Println(err)
+	}
+}
+
+// VirtualTerminal displays the Virtual Terminal page
 func (app *application) VirtualTerminal(w http.ResponseWriter, r *http.Request) {
 
 	if err := app.renderTemplate(w, r, "terminal", &templateData{}, "stripe-js"); err != nil {
-		app.errorLog.Println("[application][VirtualTerminal] => (error encounterd):")
 		app.errorLog.Println(err)
 	}
 }
