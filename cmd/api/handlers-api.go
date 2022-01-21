@@ -23,8 +23,6 @@ type jsonResponse struct {
 }
 
 func (app *application) GetPaymentIntent(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("[api][handlerss-api][GetPaymentIntent] =>")
-
 	var payload stripePayload
 	err := json.NewDecoder(r.Body).Decode(&payload)
 	if err != nil {
@@ -37,12 +35,6 @@ func (app *application) GetPaymentIntent(w http.ResponseWriter, r *http.Request)
 		app.errorLog.Println(err)
 		return
 	}
-
-	fmt.Println("[api][handlerss-api][GetPaymentIntent] => (amount): ", amount)
-
-	logSnippet := "[api][handlerss-api][GetPaymentIntent] =>"
-	fmt.Printf("\n%s (app.config.stripe.secret): %s\n", logSnippet, app.config.stripe.secret)
-	fmt.Printf("\n%s (app.config.stripe.key): %s\n", logSnippet, app.config.stripe.key)
 
 	card := cards.Card{
 		Secret:   app.config.stripe.secret,
