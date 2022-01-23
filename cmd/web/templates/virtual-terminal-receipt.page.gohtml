@@ -1,0 +1,49 @@
+{{template "base" . }}
+
+{{define "title"}}
+    Virtual Terminal Payment Succeeded! 
+{{end}}
+
+{{define "content"}}
+    {{$txn := index .Data "txn"}}
+    <h2 class="mt-5">Virtual Terminal Payment Succeeded</h2>
+    <hr>
+    <div class="container">  
+        <div class="row">
+            <div class="col">Payment Intent:</div>
+            <div class="col"> {{$txn.PaymentIntentID}}</div>
+        </div>
+        <div class="row">
+            <div class="col">Cardholder:</div>
+            <div class="col">{{$txn.FirstName}} {{$txn.LastName}}</div>
+        </div>
+        <div class="row">
+            <div class="col">Email:</div>
+            <div class="col">{{$txn.Email}}</div>
+        </div>
+        <div class="row">
+            <div class="col">Payment Method:</div>
+            <div class="col">{{$txn.PaymentMethodID}}</div>
+        </div>
+        <div class="row">
+            <div class="col">Payment Amount:</div>
+            <div class="col">{{formatCurrency $txn.PaymentAmount}}</div>
+        </div>
+        <div class="row">
+            <div class="col">Currency:</div>
+            <div class="col">{{$txn.PaymentCurrency}}</div>
+        </div>
+        <div class="row">
+            <div class="col">Last Four:</div>
+            <div class="col">{{$txn.LastFour}}</div>
+        </div>
+        <div class="row">
+            <div class="col">Bank Return Code:</div>
+            <div class="col">{{$txn.BankReturnCode}}</div>
+        </div>
+        <div class="row">
+            <div class="col">Expiry Date:</div>
+            <div class="col">{{$txn.ExpiryMonth}}/{{$txn.ExpiryYear}}</div>
+        </div>
+    </div>
+{{end}}
