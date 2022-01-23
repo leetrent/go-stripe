@@ -13,6 +13,7 @@ func (app *application) routes() http.Handler {
 
 	mux.Get("/", app.Home)
 	mux.Get("/virtual-terminal", app.VirtualTerminal)
+	mux.Get("/receipt", app.Receipt)
 	mux.Post("/payment-succeeded", app.PaymentSucceeded)
 
 	//mux.Get("/charge-once", app.ChargeOnce)

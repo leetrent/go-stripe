@@ -5,44 +5,45 @@
 {{end}}
 
 {{define "content"}}
+    {{$txn := index .Data "txn"}}
     <h2 class="mt-5">Payment Succeeded</h2>
     <hr>
     <div class="container">  
         <div class="row">
             <div class="col">Payment Intent:</div>
-            <div class="col"> {{index .Data "paymentIntent"}}</div>
+            <div class="col"> {{$txn.PaymentIntentID}}</div>
         </div>
         <div class="row">
             <div class="col">Cardholder:</div>
-            <div class="col">{{index .Data "cardHolder"}}</div>
+            <div class="col">{{$txn.FirstName}} {{$txn.LastName}}</div>
         </div>
         <div class="row">
             <div class="col">Email:</div>
-            <div class="col">{{index .Data "email"}}</div>
+            <div class="col">{{$txn.Email}}</div>
         </div>
         <div class="row">
             <div class="col">Payment Method:</div>
-            <div class="col">{{index .Data "paymentMethod"}}</div>
+            <div class="col">{{$txn.PaymentMethodID}}</div>
         </div>
         <div class="row">
             <div class="col">Payment Amount:</div>
-            <div class="col">{{index .Data "paymentAmount"}}</div>
+            <div class="col">{{formatCurrency $txn.PaymentAmount}}</div>
         </div>
         <div class="row">
             <div class="col">Currency:</div>
-            <div class="col">{{index .Data "paymentCurrency"}}</div>
+            <div class="col">{{$txn.PaymentCurrency}}</div>
         </div>
         <div class="row">
             <div class="col">Last Four:</div>
-            <div class="col">{{index .Data "last_four"}}</div>
+            <div class="col">{{$txn.LastFour}}</div>
         </div>
         <div class="row">
             <div class="col">Bank Return Code:</div>
-            <div class="col">{{index .Data "bank_return_code"}}</div>
+            <div class="col">{{$txn.BankReturnCode}}</div>
         </div>
         <div class="row">
             <div class="col">Expiry Date:</div>
-            <div class="col">{{index .Data "expiry_month"}}/{{index .Data "expiry_year"}}</div>
+            <div class="col">{{$txn.ExpiryMonth}}/{{$txn.ExpiryYear}}</div>
         </div>
     </div>
 {{end}}
