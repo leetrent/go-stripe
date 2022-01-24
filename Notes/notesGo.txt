@@ -17,3 +17,8 @@ $ go run ./cmd/api
 
 # Run in browser
 http://localhost:4001/api/payment-intent
+
+
+https://github.com/alexedwards/scs
+
+$ go get github.com/alexedwards/scs/v2

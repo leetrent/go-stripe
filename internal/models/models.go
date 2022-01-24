@@ -70,8 +70,12 @@ type Transaction struct {
 	Amount              int       `json:"amount"`
 	Currency            string    `json:"currency"`
 	LastFour            string    `json:"last_four"`
+	ExpiryMonth         int       `json:"expiry_month"`
+	ExpiryYear          int       `json:"expiry_year"`
 	BankReturnCode      string    `json:"bank_return_code"`
 	TransactionStatusID int       `json:"transaction_status_id"`
+	PaymentInent        string    `json:"payment_intent"`
+	PaymentMethod       string    `json:"payment_method"`
 	CreatedAt           time.Time `json:"-"`
 	UpdatedAt           time.Time `json:"-"`
 }
@@ -146,10 +150,14 @@ func (m *DBModel) InsertTransaction(txn Transaction) (int, error) {
 			last_four,
 			bank_return_code,
 			transaction_status_id,
+			expiry_month,
+			expiry_year,
+			payment_intent,
+			payment_method,
 			created_at,
 			updated_at
 		) 
-		VALUES (?, ?, ?, ?, ?, ?, ?)`
+		VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
 
 	result, err := m.DB.ExecContext(ctx, stmt,
 		txn.Amount,
@@ -157,6 +165,10 @@ func (m *DBModel) InsertTransaction(txn Transaction) (int, error) {
 		txn.LastFour,
 		txn.BankReturnCode,
 		txn.TransactionStatusID,
+		txn.ExpiryMonth,
+		txn.ExpiryYear,
+		txn.PaymentInent,
+		txn.PaymentMethod,
 		time.Now(),
 		time.Now(),
 	)
@@ -184,20 +196,59 @@ func (m *DBModel) InsertOrder(order Order) (int, error) {
 		INSERT INTO orders (
 			widget_id,
 			transaction_id,
+			customer_id,
 			status_id,
 			quantity,
 			amount,
 			created_at,
 			updated_at
 		) 
-		VALUES (?, ?, ?, ?, ?, ?, ?)`
+		VALUES (?, ?, ?, ?, ?, ?, ?, ?)`
 
 	result, err := m.DB.ExecContext(ctx, stmt,
 		order.WidgetID,
 		order.TransactionID,
+		order.CustomerID,
 		order.StatusID,
 		order.Quantity,
 		order.Amount,
+		time.Now(),
+		time.Now(),
+	)
+
+	if err != nil {
+		return 0, err
+	}
+
+	id, err := result.LastInsertId()
+	if err != nil {
+		return 0, err
+	}
+
+	return int(id), nil
+}
+
+// InsertCustomer inserts a new row into the Customers table
+// and returns the primary key for the newly created row and an
+// error (if any)
+func (m *DBModel) InsertCustomer(cust Customer) (int, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	stmt := `
+		INSERT INTO customers (
+			first_name,
+			last_name,
+			email,
+			created_at,
+			updated_at
+		) 
+		VALUES (?, ?, ?, ?, ?)`
+
+	result, err := m.DB.ExecContext(ctx, stmt,
+		cust.FirstName,
+		cust.LastName,
+		cust.Email,
 		time.Now(),
 		time.Now(),
 	)
