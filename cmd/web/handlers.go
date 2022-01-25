@@ -284,3 +284,14 @@ func (app *application) SaveOrder(order models.Order) (int, error) {
 
 	return id, nil
 }
+
+func (app *application) BronzePlan(w http.ResponseWriter, r *http.Request) {
+	intMap := make(map[string]int)
+	intMap["plan_id"] = 1
+
+	if err := app.renderTemplate(w, r, "bronze-plan", &templateData{
+		IntMap: intMap,
+	}); err != nil {
+		app.errorLog.Print(err)
+	}
+}
