@@ -17,3 +17,8 @@ $ soda migrate
 $ soda generate fizz AddColumnstoTransactions
 $ soda migrate
 
+$ soda generate fizz AddColumnstoWidgets
+$ soda migrate
+
+
+
