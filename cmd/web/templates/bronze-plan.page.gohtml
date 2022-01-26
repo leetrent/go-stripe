@@ -3,7 +3,8 @@
 {{define "title"}}Bronze Plan{{end}}
 {{define "content"}}
     {{$widget := index .Data "widget"}}  
-    <h3 class="mt-5 pb-0 mb-0">{{$widget.Name}}: {{formatCurrency $widget.Price}}</h3>
+    <h2 class="mt-5 pb-0 mb-0">{{$widget.Name}}</h2>
+    <h5>{{formatCurrency $widget.Price}} per month</h5>
     <hr class="py-0 my-1">
     <p class="pt-0 mt-0">{{$widget.Description}}</p>
 
@@ -54,4 +55,129 @@
         <input type="hidden" name="payment_amount" id="payment_amount">
         <input type="hidden" name="payment_currency" id="payment_currency">
     </form>
+{{end}}
+
+{{define "js"}}
+    {{$widget := index .Data "widget"}}
+    <script src="https://js.stripe.com/v3"></script>
+    <script>
+         let card;
+         let stripe = Stripe({{.StripePublishableKey}});
+        
+        const cardMessages = document.getElementById("card-messages");
+        const payButton = document.getElementById("pay-button");
+        const processing = document.getElementById("processing-payment");
+        
+        function hidePayButton() {
+            payButton.classList.add("d-none");
+            processing.classList.remove("d-none");
+        }
+
+        function showPayButtons() {
+            payButton.classList.remove("d-none");
+            processing.classList.add("d-none");
+        }
+
+        function showCardError(msg) {
+            cardMessages.classList.add("alert-danger");
+            cardMessages.classList.remove("alert-success");
+            cardMessages.classList.remove("d-none");
+            cardMessages.innerText = msg;
+        }
+
+        function showCardSuccess(msg) {
+            cardMessages.classList.remove("alert-danger");
+            cardMessages.classList.add("alert-success");
+            cardMessages.classList.remove("d-none");
+            cardMessages.innerText = "Credit card transaction was successful.";
+        }   
+
+        (function() {
+            // Create Stripe and elements
+            const elements = stripe.elements();
+            const style = {
+                base: {
+                    fontSize: '16px',
+                    lineHeight: '24px'
+                }
+            };
+
+            // Create card entry
+            card = elements.create('card', {
+                style: style,
+                hidePostalCode: false,
+            });           
+            card.mount("#card-element");
+
+            // Check for credit card input errors
+            card.addEventListener('change', function(event) {
+                var displayError = document.getElementById("card-errors");
+                if (event.error) {
+                    displayError.classList.remove('d-none');
+                    displayError.textContent = event.error.message;
+                } else {
+                    displayError.classList.add('d-none');
+                    displayError.textContent = '';
+                }
+            });
+        })();
+
+        function val(amountToCharge) {
+            console.log("[bronze-plan.page][val] => (amountToCharge):", amountToCharge);
+
+            let form = document.getElementById("charge_form");
+
+            if (form.checkValidity() === false) {
+                this.event.preventDefault();
+                this.event.stopPropagation();
+                form.classList.add("was-validated");
+                return;
+            }
+
+            form.classList.add("was-validated");
+            hidePayButton();
+
+            stripe.createPaymentMethod({
+                type: 'card',
+                card: card,
+                billing_details: {
+                    email: document.getElementById("cardholder-email").value,
+                },
+            }).then(stripePaymentMethodHandler);
+        }
+
+        function stripePaymentMethodHandler(result) {
+            if (result.error) {
+                showCardError(result.error.message);
+            } else {
+                // Create a customer and subscription to bronze plan
+                let payload = {
+                    plan: '{{$widget.PlanID}}',
+                    payment_method: result.paymentMethod.id,
+                    email: document.getElementById("cardholder-email").value,
+                    last_four: result.paymentMethod.card.last4,
+                }
+
+                const requestOptions = {
+                    method: 'post',
+                    header: {
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(payload),
+                }
+
+                let url = "{{.API}}/api/create-customer-and-subscribe-to-plan";
+                console.log("[bronze-plan] => (url):", url);
+                fetch(url, requestOptions)
+                .then(response => response.json())
+                .then(function(data) {
+                    console.log("[bronze-plan] => (data):", data);
+                    processing.classList.add("d-none");
+                    // Set hidden variables
+                    // submit form
+                })
+            }
+        }
+    </script>
 {{end}}
