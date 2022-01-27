@@ -5,9 +5,12 @@ import (
 	"fmt"
 	"net/http"
 	"strconv"
+	"time"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/leetrent/go-stripe/internal/cards"
+	"github.com/leetrent/go-stripe/internal/models"
+	"github.com/stripe/stripe-go/v72"
 )
 
 type stripePayload struct {
@@ -15,8 +18,14 @@ type stripePayload struct {
 	Amount        string `json:"amount"`
 	PaymentMethod string `json:"payment_method"`
 	Email         string `json:"email"`
+	CardBrand     string `json:"card_brand"`
+	ExpiryMonth   int    `json:"exp_month"`
+	ExpiryYear    int    `json:"exp_year"`
 	LastFour      string `json:"last_four"`
 	Plan          string `json:"plan"`
+	ProductID     string `json:"product_id"`
+	FirstName     string `json:"first_name"`
+	LastName      string `json:"last_name"`
 }
 
 type jsonResponse struct {
@@ -102,6 +111,9 @@ func (app *application) GetWidgetByID(w http.ResponseWriter, r *http.Request) {
 
 func (app *application) CreateCustomerAndSubscribeToPlan(w http.ResponseWriter, r *http.Request) {
 	var data stripePayload
+	var subscription *stripe.Subscription
+	okay := true
+	txnMsg := "Transaction was successful!"
 
 	err := json.NewDecoder(r.Body).Decode(&data)
 	if err != nil {
@@ -109,7 +121,7 @@ func (app *application) CreateCustomerAndSubscribeToPlan(w http.ResponseWriter, 
 		return
 	}
 
-	app.infoLog.Println(data.Email, data.LastFour, data.PaymentMethod, data.Plan)
+	//app.infoLog.Println(data.Email, data.LastFour, data.PaymentMethod, data.Plan)
 
 	card := cards.Card{
 		Secret:   app.config.stripe.secret,
@@ -120,24 +132,107 @@ func (app *application) CreateCustomerAndSubscribeToPlan(w http.ResponseWriter, 
 	stripeCustomer, msg, err := card.CreateCustomer(data.PaymentMethod, data.Email)
 	if err != nil {
 		app.errorLog.Println(err)
-		return
+		txnMsg = msg
+		okay = false
 	}
 
-	subscriptionID, err := card.SubscribeToPlan(stripeCustomer, data.Plan, data.Email, data.LastFour, "")
-	if err != nil {
-		app.errorLog.Println(err)
-		return
+	if okay {
+		subscription, err = card.SubscribeToPlan(stripeCustomer, data.Plan, data.Email, data.LastFour, "")
+		if err != nil {
+			app.errorLog.Println(err)
+			txnMsg = err.Error()
+			okay = false
+		}
+
+		app.infoLog.Println("[handlers-api][CreateCustomerAndSubscribeToPlan] => (subscriptionID): ", subscription.ID)
 	}
 
-	app.infoLog.Println("[handlers-api][CreateCustomerAndSubscribeToPlan] => (subscriptionID): ", subscriptionID)
+	if okay {
+		productID, err := strconv.Atoi(data.ProductID)
+		if err != nil {
+			app.errorLog.Println(err)
+			txnMsg = err.Error()
+			okay = false
+		}
 
-	okay := true
-	//msg := ""
+		//////////////////////////////////////////////////////////////////////////////
+		// Create New Customer
+		//////////////////////////////////////////////////////////////////////////////
+		customerID, err := app.SaveCustomer(data.FirstName, data.LastName, data.Email)
+		if err != nil {
+			app.errorLog.Println(err)
+			txnMsg = err.Error()
+			okay = false
+		}
+		app.infoLog.Println("[api][handlers-api][CreateCustomerAndSubscribeToPlan] => (customerID):", customerID)
+
+		//////////////////////////////////////////////////////////////////////////////
+		// Create New Transaction
+		//////////////////////////////////////////////////////////////////////////////
+		amount, err := strconv.Atoi(data.Amount)
+		if err != nil {
+			app.errorLog.Println(err)
+			txnMsg = err.Error()
+			okay = false
+		}
+		// expiryMonth, err := strconv.Atoi(data.ExpiryMonth)
+		// if err != nil {
+		// 	app.errorLog.Println(err)
+		// 	txnMsg = err.Error()
+		// 	okay = false
+		// }
+		// expiryYear, err := strconv.Atoi(data.ExpiryYear)
+		// if err != nil {
+		// 	app.errorLog.Println(err)
+		// 	txnMsg = err.Error()
+		// 	okay = false
+		// }
+
+		txn := models.Transaction{
+			Amount:              amount,
+			Currency:            "usd",
+			LastFour:            data.LastFour,
+			ExpiryMonth:         data.ExpiryMonth,
+			ExpiryYear:          data.ExpiryYear,
+			TransactionStatusID: 2,
+		}
+
+		txnId, err := app.SaveTransaction(txn)
+		if err != nil {
+			app.errorLog.Println(err)
+			txnMsg = err.Error()
+			okay = false
+		}
+		app.infoLog.Println("[api][handlers-api][CreateCustomerAndSubscribeToPlan] => (transactionID):", txnId)
+
+		//////////////////////////////////////////////////////////////////////////////
+		// Create New Order
+		//////////////////////////////////////////////////////////////////////////////
+		order := models.Order{
+			WidgetID:      productID,
+			TransactionID: txnId,
+			CustomerID:    customerID,
+			StatusID:      1,
+			Quantity:      1,
+			Amount:        amount,
+			CreatedAt:     time.Now(),
+			UpdatedAt:     time.Now(),
+		}
+
+		orderID, err := app.SaveOrder(order)
+		if err != nil {
+			app.errorLog.Println(err)
+			txnMsg = err.Error()
+			okay = false
+		}
+		app.infoLog.Println("[api][handlers-api][CreateCustomerAndSubscribeToPlan] => (orderID):", orderID)
+
+	}
 
 	resp :=
 		jsonResponse{
 			OK:      okay,
-			Message: msg,
+			Message: txnMsg,
 		}
 
 	out, err := json.MarshalIndent(resp, "", "   ")
@@ -149,4 +244,43 @@ func (app *application) CreateCustomerAndSubscribeToPlan(w http.ResponseWriter, 
 	w.Header().Set("Content-Type", "application/json")
 	w.Write(out)
 
+}
+
+// SaveCustomer saves a customer and returns the primary key
+func (app *application) SaveCustomer(firstName, lastName, email string) (int, error) {
+	customer := models.Customer{
+		FirstName: firstName,
+		LastName:  lastName,
+		Email:     email,
+	}
+
+	id, err := app.DB.InsertCustomer(customer)
+	if err != nil {
+		app.errorLog.Println(err)
+		return 0, err
+	}
+
+	return id, nil
+}
+
+// SaveTransaction saves a transaction and returns the primary key
+func (app *application) SaveTransaction(txn models.Transaction) (int, error) {
+	id, err := app.DB.InsertTransaction(txn)
+	if err != nil {
+		app.errorLog.Println(err)
+		return 0, err
+	}
+
+	return id, nil
+}
+
+// SaveOrder saves an order and returns the primary key
+func (app *application) SaveOrder(order models.Order) (int, error) {
+	id, err := app.DB.InsertOrder(order)
+	if err != nil {
+		app.errorLog.Println(err)
+		return 0, err
+	}
+
+	return id, nil
 }
