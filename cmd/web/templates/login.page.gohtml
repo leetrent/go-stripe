@@ -53,7 +53,7 @@
 
             const fetchUrl = "{{.API}}/api/authenticate";
             console.log("[login] => (fetchUrl):", fetchUrl);
-            fetch(url, requestOptions)
+            fetch(fetchUrl, requestOptions)
             .then(response => response.json())
             .then(response => {
                 console.log("[login] => (response):", response);
