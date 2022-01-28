@@ -30,6 +30,9 @@ func (app *application) routes() http.Handler {
 	mux.Get("/plans/bronze", app.BronzePlan)
 	mux.Get("/receipt/bronze", app.BronzePlanReceipt)
 
+	// Authentication
+	mux.Get("/login", app.LoginPage)
+
 	return mux
 
 }
