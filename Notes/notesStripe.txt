@@ -7,3 +7,14 @@
 
 #
 4242 4242 4242 4242
+
+------------------------------------------------------
+-- Subscriptions
+------------------------------------------------------
+Bronze Widget Plan
+Receive three widgets for the price of two every month!
+Standard Pricing
+$20.00
+Recurring
+Monthly
+------------------------------------------------------

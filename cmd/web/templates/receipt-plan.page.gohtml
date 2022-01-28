@@ -1,0 +1,57 @@
+{{template "base" . }}
+
+{{define "title"}}
+    Payment Succeeded! 
+{{end}}
+
+{{define "content"}}
+    {{$txn := index .Data "txn"}}
+    <h2 class="mt-5">Payment Succeeded</h2>
+    <hr>
+    <div class="container">  
+        <div class="row">
+            <div class="col">Cardholder:</div>
+            <div class="col"><span id="first_name"></span>&nbsp;<span id="last_name"></span></div>
+        </div>
+        <div class="row">
+            <div class="col">Payment Amount:</div>
+            <div class="col"><span id="amount"></span></div>
+        </div>
+        <div class="row">
+            <div class="col">Last Four:</div>
+            <div class="col"><span id="last_four"></span></div>
+        </div>
+    </div>
+{{end}}
+
+{{define "js"}}
+    <script>
+        const notAvailable = "Not available";
+
+        if (sessionStorage.first_name) {
+            document.getElementById("first_name").innerHTML = sessionStorage.first_name;
+        } else {
+            document.getElementById("first_name").innerHTML = notAvailable;
+        }
+
+        if (sessionStorage.last_name) {
+            document.getElementById("last_name").innerHTML = sessionStorage.last_name;
+        } else {
+            document.getElementById("last_name").innerHTML = notAvailable;
+        }
+
+        if (sessionStorage.amount) {
+            document.getElementById("amount").innerHTML = sessionStorage.amount;
+        } else {
+            document.getElementById("amount").innerHTML = notAvailable;
+        }
+
+        if (sessionStorage.last_four) {
+            document.getElementById("last_four").innerHTML = sessionStorage.last_four;
+        } else {
+            document.getElementById("last_four").innerHTML = notAvailable;
+        }
+
+        sessionStorage.clear();
+    </script>
+{{end}}

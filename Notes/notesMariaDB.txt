@@ -8,3 +8,7 @@ import (
 
 	_ "github.com/go-sql-driver/mysql"
 )
+
+select * from widgets.customers where id = 12;
+select * from widgets.transactions where id = 16;
+select * from widgets.orders where id = 10;
