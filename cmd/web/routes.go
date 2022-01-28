@@ -28,6 +28,7 @@ func (app *application) routes() http.Handler {
 
 	// Subscrption plans
 	mux.Get("/plans/bronze", app.BronzePlan)
+	mux.Get("/receipt/bronze", app.BronzePlanReceipt)
 
 	return mux
 
