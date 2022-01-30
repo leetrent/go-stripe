@@ -279,7 +279,8 @@ func (m *DBModel) GetUserByEmail(email string) (User, error) {
 
 	email = strings.ToLower(email)
 	var u User
-	sql := `SELECT	first_name,
+	sql := `SELECT	id,
+					first_name,
 					last_name,
 					email,
 					password,

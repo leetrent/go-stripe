@@ -286,6 +286,10 @@ func (app *application) SaveOrder(order models.Order) (int, error) {
 }
 
 func (app *application) CreateAuthToken(w http.ResponseWriter, r *http.Request) {
+	logSnippet := "[api][handers-api][CreateAuthToken] =>"
+
+	fmt.Printf("%s", logSnippet)
+
 	var userInput struct {
 		Email    string `json:"email"`
 		Password string `json:"password"`
@@ -293,18 +297,39 @@ func (app *application) CreateAuthToken(w http.ResponseWriter, r *http.Request) 
 
 	err := app.readJSON(w, r, &userInput)
 	if err != nil {
+		fmt.Printf("%s application.readJSON returned an error", logSnippet)
 		app.badRequest(w, r, err)
 		return
 	}
 
-	////////////////////////////////
+	///////////////////////////////////////////////////
 	// Retrieve user by email address
-	////////////////////////////////
+	///////////////////////////////////////////////////
 	user, err := app.DB.GetUserByEmail(userInput.Email)
+	if err != nil {
+		fmt.Printf("%s app.DB.GetUserByEmail returned an error", logSnippet)
+		app.invalidCredentials(w)
+		return
+	}
+
+	app.infoLog.Printf("%s User found: %s", logSnippet, user.Email)
+	fmt.Printf("%s User found: %s", logSnippet, user.Email)
+
+	///////////////////////////////////////////////////
+	// Validate password
+	///////////////////////////////////////////////////
+	validPassword, err := app.passwordMatches(user.Password, userInput.Password)
 	if err != nil {
 		app.invalidCredentials(w)
 		return
 	}
+
+	if !validPassword {
+		app.invalidCredentials(w)
+		return
+	}
+
+	fmt.Printf("%s Password is valid for: %s", logSnippet, user.Email)
 
 	var payload struct {
 		Error   bool   `json:"error"`
