@@ -20,5 +20,9 @@ $ soda migrate
 $ soda generate fizz AddColumnstoWidgets
 $ soda migrate
 
+$ soda generate fizz CreateTokensTable
+soda migrate
+
+
 
 

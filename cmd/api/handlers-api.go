@@ -341,6 +341,16 @@ func (app *application) CreateAuthToken(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
+	///////////////////////////////////////////////////
+	// Save Genereate Token to Database
+	///////////////////////////////////////////////////
+	err = app.DB.InsertToken(token, user)
+	if err != nil {
+		app.errorLog.Println(err)
+		app.badRequest(w, r, err)
+		return
+	}
+
 	var payload struct {
 		Error   bool          `json:"error"`
 		Message string        `json:"message"`
