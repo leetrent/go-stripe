@@ -48,11 +48,11 @@ func (m *DBModel) InsertToken(t *Token, u User) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 
-	stmt := `INSERT INTO tokens
-				(user_id, name, email, token_hash, created_at, updated_at)
-				values(?, ?, ?, ?, ?, ?)`
-
-	result, err := m.DB.ExecContext(ctx, stmt, u.ID, u.LastName, u.Email, t.Hash, time.Now(), time.Now())
+	/////////////////////////////////////////////////////////////////////////
+	// DELETE existing token for User (if any)
+	/////////////////////////////////////////////////////////////////////////
+	stmt := "DELETE FROM tokens WHERE user_id = ?"
+	result, err := m.DB.ExecContext(ctx, stmt, u.ID)
 	if err != nil {
 		fmt.Println(err)
 		return err
@@ -61,7 +61,28 @@ func (m *DBModel) InsertToken(t *Token, u User) error {
 	lastInsertId, _ := result.LastInsertId()
 	rowsAffected, _ := result.RowsAffected()
 
-	logSnippet := "[api][tokens][InsertToken] =>"
+	logSnippet := "[api][tokens][DeleteToken] =>"
+	fmt.Sprintf("%s (result.LastInsertId(): %d", logSnippet, lastInsertId)
+	fmt.Sprintf("%s (result.RowsAffected(): %d", logSnippet, rowsAffected)
+
+	/////////////////////////////////////////////////////////////////////////
+	// INSERT new token for User (if any)
+	/////////////////////////////////////////////////////////////////////////
+
+	stmt = `INSERT INTO tokens
+				(user_id, name, email, token_hash, created_at, updated_at)
+				values(?, ?, ?, ?, ?, ?)`
+
+	result, err = m.DB.ExecContext(ctx, stmt, u.ID, u.LastName, u.Email, t.Hash, time.Now(), time.Now())
+	if err != nil {
+		fmt.Println(err)
+		return err
+	}
+
+	lastInsertId, _ = result.LastInsertId()
+	rowsAffected, _ = result.RowsAffected()
+
+	logSnippet = "[api][tokens][InsertToken] =>"
 	fmt.Sprintf("%s (result.LastInsertId(): %d", logSnippet, lastInsertId)
 	fmt.Sprintf("%s (result.RowsAffected(): %d", logSnippet, rowsAffected)
 

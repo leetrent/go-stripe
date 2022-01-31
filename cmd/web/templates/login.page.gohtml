@@ -5,6 +5,7 @@
 {{define "content"}}
     <h2 class="mt-2 mb-3">Login</h2>
     <hr>
+    <div class="alert alert-danger text-center d-none" id="login-messages"></div>
     <form   
         action="" 
         method="POST" 
@@ -27,6 +28,20 @@
 
 {{define "js"}}
     <script>
+        let loginMessages = document.getElementById("login-messages");
+        function showError(msg) {
+            loginMessages.classList.add("alert-danger");
+            loginMessages.classList.remove("alert-success");
+            loginMessages.classList.remove("d-none");
+            loginMessages.innerText = msg;
+        }
+
+        function showSuccess(msg) {
+            loginMessages.classList.remove("alert-danger");
+            loginMessages.classList.add("alert-success");
+            loginMessages.classList.remove("d-none");
+            loginMessages.innerText = "Login was successful.";
+        }
         function val() {
             let form = document.getElementById("login_form");
             if (form.checkValidity() === false) {
@@ -55,8 +70,15 @@
             console.log("[login] => (fetchUrl):", fetchUrl);
             fetch(fetchUrl, requestOptions)
             .then(response => response.json())
-            .then(response => {
-                console.log("[login] => (response):", response);
+            .then(data => {
+                console.log("[login] => (data):", data);
+                if (data.error === false) {
+                    localStorage.setItem('token', data.authentication_token.token);
+                    localStorage.setItem('token_expiry', data.authentication_token.expiry);
+                    showSuccess()
+                } else {
+                    showError(data.message);
+                }
             })
 
         
