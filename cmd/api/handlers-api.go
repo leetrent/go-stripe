@@ -331,13 +331,25 @@ func (app *application) CreateAuthToken(w http.ResponseWriter, r *http.Request) 
 
 	fmt.Printf("%s Password is valid for: %s", logSnippet, user.Email)
 
+	///////////////////////////////////////////////////
+	// Genereate Token
+	///////////////////////////////////////////////////
+	token, err := models.GenerateToken(user.ID, 24*time.Hour, models.ScopeAuthentication)
+	if err != nil {
+		app.errorLog.Println(err)
+		app.badRequest(w, r, err)
+		return
+	}
+
 	var payload struct {
-		Error   bool   `json:"error"`
-		Message string `json:"message"`
+		Error   bool          `json:"error"`
+		Message string        `json:"message"`
+		Token   *models.Token `json:"authentication_token"`
 	}
 
 	payload.Error = false
-	payload.Message = "Success!"
+	payload.Message = fmt.Sprintf("token for %s created", userInput.Email)
+	payload.Token = token
 
 	_ = app.writeJSON(w, http.StatusOK, payload)
 }
