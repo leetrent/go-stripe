@@ -2,9 +2,11 @@ package main
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/http"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/go-chi/chi/v5"
@@ -283,4 +285,128 @@ func (app *application) SaveOrder(order models.Order) (int, error) {
 	}
 
 	return id, nil
+}
+
+func (app *application) CreateAuthToken(w http.ResponseWriter, r *http.Request) {
+	logSnippet := "[api][handers-api][CreateAuthToken] =>"
+
+	fmt.Printf("%s", logSnippet)
+
+	var userInput struct {
+		Email    string `json:"email"`
+		Password string `json:"password"`
+	}
+
+	err := app.readJSON(w, r, &userInput)
+	if err != nil {
+		fmt.Printf("%s application.readJSON returned an error", logSnippet)
+		app.badRequest(w, r, err)
+		return
+	}
+
+	///////////////////////////////////////////////////
+	// Retrieve user by email address
+	///////////////////////////////////////////////////
+	user, err := app.DB.GetUserByEmail(userInput.Email)
+	if err != nil {
+		fmt.Printf("%s app.DB.GetUserByEmail returned an error", logSnippet)
+		app.invalidCredentials(w)
+		return
+	}
+
+	app.infoLog.Printf("%s User found: %s", logSnippet, user.Email)
+	fmt.Printf("%s User found: %s", logSnippet, user.Email)
+
+	///////////////////////////////////////////////////
+	// Validate password
+	///////////////////////////////////////////////////
+	validPassword, err := app.passwordMatches(user.Password, userInput.Password)
+	if err != nil {
+		app.invalidCredentials(w)
+		return
+	}
+
+	if !validPassword {
+		app.invalidCredentials(w)
+		return
+	}
+
+	fmt.Printf("%s Password is valid for: %s", logSnippet, user.Email)
+
+	///////////////////////////////////////////////////
+	// Generate Token
+	///////////////////////////////////////////////////
+	token, err := models.GenerateToken(user.ID, 24*time.Hour, models.ScopeAuthentication)
+	if err != nil {
+		app.errorLog.Println(err)
+		app.badRequest(w, r, err)
+		return
+	}
+
+	///////////////////////////////////////////////////
+	// Save Genereate Token to Database
+	///////////////////////////////////////////////////
+	err = app.DB.InsertToken(token, user)
+	if err != nil {
+		app.errorLog.Println(err)
+		app.badRequest(w, r, err)
+		return
+	}
+
+	var payload struct {
+		Error   bool          `json:"error"`
+		Message string        `json:"message"`
+		Token   *models.Token `json:"authentication_token"`
+	}
+
+	payload.Error = false
+	payload.Message = fmt.Sprintf("token for %s created", userInput.Email)
+	payload.Token = token
+
+	_ = app.writeJSON(w, http.StatusOK, payload)
+}
+
+func (app *application) authenticateToken(r *http.Request) (*models.User, error) {
+	authorizationHeader := r.Header.Get("Authorization")
+	if authorizationHeader == "" {
+		return nil, errors.New("no authorization header received")
+	}
+
+	oneSpace := " "
+	headerParts := strings.Split(authorizationHeader, oneSpace)
+	if len(headerParts) != 2 || headerParts[0] != "Bearer" {
+		return nil, errors.New("no bearer token found for user")
+	}
+
+	token := headerParts[1]
+	if len(token) != 26 {
+		return nil, errors.New("bearer token is an incorrect length")
+	}
+
+	user, err := app.DB.GetUserForToken(token)
+	if err != nil {
+		return nil, errors.New("not matching token found for user")
+	}
+
+	return user, nil
+
+}
+
+func (app *application) CheckAuthentication(w http.ResponseWriter, r *http.Request) {
+	user, err := app.authenticateToken(r)
+	if err != nil {
+		app.invalidCredentials(w)
+		return
+	}
+
+	var payload struct {
+		Error   bool   `json:"error"`
+		Message string `json:"message"`
+	}
+
+	payload.Error = false
+	payload.Message = fmt.Sprintf("%s has been authenticated", user.Email)
+
+	app.writeJSON(w, http.StatusOK, payload)
+
 }

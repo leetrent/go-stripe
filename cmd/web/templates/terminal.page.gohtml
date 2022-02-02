@@ -44,5 +44,6 @@
 </form>
 {{end}}
 {{define "js"}} 
+    <script>checkAuth();</script>
     {{template "stripe-js" .}}
 {{end}}
