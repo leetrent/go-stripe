@@ -26,5 +26,7 @@ $ soda migrate
 $ soda generate fizz AddExpiryToTokens
 $ soda migrate
 
+$ soda generate sql CreateSessionsTable
+
 
 

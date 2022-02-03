@@ -10,6 +10,7 @@ import (
 	"os"
 	"time"
 
+	"github.com/alexedwards/scs/mysqlstore"
 	"github.com/alexedwards/scs/v2"
 	"github.com/leetrent/go-stripe/internal/driver"
 	"github.com/leetrent/go-stripe/internal/models"
@@ -87,6 +88,7 @@ func main() {
 	// Configure HTTP Session
 	session := scs.New()
 	session.Lifetime = 24 * time.Hour
+	session.Store = mysqlstore.New(conn)
 
 	tc := make(map[string]*template.Template)
 
