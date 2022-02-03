@@ -7,7 +7,7 @@
     <hr>
     <div class="alert alert-danger text-center d-none" id="login-messages"></div>
     <form   
-        action="" 
+        action="/login" 
         method="POST" 
         name="login_form" 
         id="login_form" 
@@ -76,7 +76,8 @@
                     localStorage.setItem('token', data.authentication_token.token);
                     localStorage.setItem('token_expiry', data.authentication_token.expiry);
                     showSuccess()
-                    location.href = "/";
+                    //location.href = "/";
+                    form.submit();
                 } else {
                     showError(data.message);
                 }
