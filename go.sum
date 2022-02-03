@@ -1,3 +1,5 @@
+github.com/alexedwards/scs/mysqlstore v0.0.0-20220131182346-524f06e83c3c h1:y8TnMEyR4Ftkhhezs38z77qgeFNxa9bOOp3BCDYOYAM=
+github.com/alexedwards/scs/mysqlstore v0.0.0-20220131182346-524f06e83c3c/go.mod h1:Ae5jMu5Nlp7KkM7RuqHAzuYBBZf5K6HfRV1WVQXXTJA=
 github.com/alexedwards/scs/v2 v2.5.0 h1:zgxOfNFmiJyXG7UPIuw1g2b9LWBeRLh3PjfB9BDmfL4=
 github.com/alexedwards/scs/v2 v2.5.0/go.mod h1:ToaROZxyKukJKT/xLcVQAChi5k6+Pn1Gvmdl7h3RRj8=
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
@@ -5,6 +7,7 @@ github.com/go-chi/chi/v5 v5.0.7 h1:rDTPXLDHGATaeHvVlLcR4Qe0zftYethFucbjVQ1PxU8=
 github.com/go-chi/chi/v5 v5.0.7/go.mod h1:DslCQbL2OYiznFReuXYUmQ2hGd1aDpCnlMNITLSKoi8=
 github.com/go-chi/cors v1.2.0 h1:tV1g1XENQ8ku4Bq3K9ub2AtgG+p16SmzeMSGTwrOKdE=
 github.com/go-chi/cors v1.2.0/go.mod h1:sSbTewc+6wYHBBCW7ytsFSn836hqM7JxpglAy2Vzc58=
+github.com/go-sql-driver/mysql v1.5.0/go.mod h1:DCzpHaOWr8IXmIStZouvnhqoel9Qv2LBy8hT2VhHyBg=
 github.com/go-sql-driver/mysql v1.6.0 h1:BCTh4TKNUYmOmMUcQ3IipzF5prigylS7XXjEkfCHuOE=
 github.com/go-sql-driver/mysql v1.6.0/go.mod h1:DCzpHaOWr8IXmIStZouvnhqoel9Qv2LBy8hT2VhHyBg=
 github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
