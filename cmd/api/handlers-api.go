@@ -408,5 +408,77 @@ func (app *application) CheckAuthentication(w http.ResponseWriter, r *http.Reque
 	payload.Message = fmt.Sprintf("%s has been authenticated", user.Email)
 
 	app.writeJSON(w, http.StatusOK, payload)
+}
 
+func (app *application) VirtualTerminalPaymentSucceeded(w http.ResponseWriter, r *http.Request) {
+	var txnData struct {
+		PaymentAmount   int    `json:"amount"`
+		PaymentCurrency string `json:"currency"`
+		FirstName       string `json:"first_name"`
+		LastName        string `json:"last_name"`
+		Email           string `json:"email"`
+		PaymentIntent   string `json:"payment_intent"`
+		PaymentMethod   string `json:"payment_method"`
+		BankReturnCode  string `json:"bank_return_code"`
+		ExpiryMonth     int    `json:"expiry_month"`
+		ExpiryYear      int    `json:"expiry_year"`
+		LastFour        string `json:"last_four"`
+	}
+
+	err := app.readJSON(w, r, &txnData)
+	if err != nil {
+		app.errorLog.Println(err)
+		app.badRequest(w, r, err)
+		return
+	}
+
+	logSnippet := "[api][handlers][VirtualTerminalPaymentSucceeded] =>"
+	app.infoLog.Printf("%s (PaymentAmount): %d", logSnippet, txnData.PaymentAmount)
+
+	card := cards.Card{
+		Secret: app.config.stripe.secret,
+		Key:    app.config.stripe.key,
+	}
+
+	pi, err := card.RetrievePaymentIntent(txnData.PaymentIntent)
+	if err != nil {
+		app.errorLog.Println(err)
+		app.badRequest(w, r, err)
+		return
+	}
+
+	pm, err := card.GetPaymentMethod(txnData.PaymentMethod)
+	if err != nil {
+		app.errorLog.Println(err)
+		app.badRequest(w, r, err)
+		return
+	}
+
+	txnData.LastFour = pm.Card.Last4
+	txnData.ExpiryMonth = int(pm.Card.ExpMonth)
+	txnData.ExpiryYear = int(pm.Card.ExpYear)
+
+	txn := models.Transaction{
+		Amount:              txnData.PaymentAmount,
+		Currency:            txnData.PaymentCurrency,
+		LastFour:            txnData.LastFour,
+		ExpiryMonth:         txnData.ExpiryMonth,
+		ExpiryYear:          txnData.ExpiryYear,
+		PaymentInent:        txnData.PaymentIntent,
+		PaymentMethod:       txnData.PaymentMethod,
+		BankReturnCode:      pi.Charges.Data[0].ID,
+		TransactionStatusID: 2,
+	}
+
+	txnID, err := app.SaveTransaction(txn)
+	if err != nil {
+		app.errorLog.Println(err)
+		app.badRequest(w, r, err)
+		return
+	}
+
+	app.infoLog.Printf("%s (txnId): %d", logSnippet, txnID)
+	fmt.Printf("%s (txnId): %d", logSnippet, txnID)
+
+	app.writeJSON(w, http.StatusOK, txn)
 }
