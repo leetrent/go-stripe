@@ -11,4 +11,5 @@ require (
 	github.com/go-chi/cors v1.2.0 // indirect
 	github.com/go-sql-driver/mysql v1.6.0 // indirect
 	github.com/stripe/stripe-go/v72 v72.81.0 // indirect
+	github.com/xhit/go-simple-mail/v2 v2.10.0 // indirect
 )

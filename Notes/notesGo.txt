@@ -35,3 +35,7 @@ CREATE TABLE sessions (
 CREATE INDEX sessions_expiry_idx ON sessions (expiry);
 
 $ go get github.com/alexedwards/scs/mysqlstore
+
+
+https://github.com/xhit/go-simple-mail
+$ go get github.com/xhit/go-simple-mail/v2
