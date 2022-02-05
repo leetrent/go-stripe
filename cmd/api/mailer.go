@@ -5,6 +5,9 @@ import (
 	"embed"
 	"fmt"
 	"html/template"
+	"time"
+
+	mail "github.com/xhit/go-simple-mail/v2"
 )
 
 //go:embed templates
@@ -12,10 +15,12 @@ var emailTemplateFS embed.FS
 
 func (app *application) SendMail(from, to, subject, tmpl string, data interface{}) error {
 
+	logSnippet := "[api][mailer] =>"
+
 	////////////////////////////////////////////////////////////////////////////////
 	// HTML
 	////////////////////////////////////////////////////////////////////////////////
-	templateToRender := fmt.Sprintf("templates/%s.html.tmpl")
+	templateToRender := fmt.Sprintf("templates/%s.html.tmpl", tmpl)
 
 	t, err := template.New("email-html").ParseFS(emailTemplateFS, templateToRender)
 	if err != nil {
@@ -30,6 +35,7 @@ func (app *application) SendMail(from, to, subject, tmpl string, data interface{
 	}
 
 	htmlMessage := tpl.String()
+	app.infoLog.Printf("%s (htmlMessage): ", logSnippet, htmlMessage)
 
 	////////////////////////////////////////////////////////////////////////////////
 	// PLAIN TEXT
@@ -48,6 +54,39 @@ func (app *application) SendMail(from, to, subject, tmpl string, data interface{
 	}
 
 	plainMessage := tpl.String()
+	app.infoLog.Printf("%s (plainMessage): ", logSnippet, plainMessage)
+
+	////////////////////////////////////////////////////////////////////////////////
+	// CONFIGURE SMTP SERVER
+	////////////////////////////////////////////////////////////////////////////////
+	server := mail.NewSMTPClient()
+	server.Host = app.config.smtp.host
+	server.Port = app.config.smtp.port
+	server.Username = app.config.smtp.username
+	server.Password = app.config.smtp.password
+	server.Encryption = mail.EncryptionTLS
+	server.KeepAlive = false
+	server.ConnectTimeout = 10 * time.Second
+	server.SendTimeout = 10 * time.Second
+
+	smtpClient, err := server.Connect()
+	if err != nil {
+		app.errorLog.Println(err)
+		return err
+	}
+
+	email := mail.NewMSG()
+	email.SetFrom(from).AddTo(to).SetSubject(subject)
+	email.SetBody(mail.TextHTML, htmlMessage)
+	email.AddAlternative(mail.TextPlain, plainMessage)
+
+	err = email.Send(smtpClient)
+	if err != nil {
+		app.errorLog.Println(err)
+		return err
+	}
+
+	app.infoLog.Printf("%s (email successfully sent): ", logSnippet)
 
 	return nil
 }
