@@ -32,6 +32,8 @@ type config struct {
 		secret string
 		key    string
 	}
+	secretKey   string
+	frontendUrl string
 }
 
 type application struct {
@@ -75,6 +77,12 @@ func main() {
 
 	cfg.stripe.key = os.Getenv("STRIPE_KEY")
 	cfg.stripe.secret = os.Getenv("STRIPE_SECRET")
+
+	/////////////////////////////////////////////////////////////////////////////
+	// CHANGE PASSWORD ENVIRONMENT VARIABLES
+	/////////////////////////////////////////////////////////////////////////////
+	cfg.secretKey = os.Getenv("SECRET_KEY")
+	cfg.frontendUrl = os.Getenv("FRONTEND_URL")
 
 	infoLog := log.New(os.Stdout, "INFO\t", log.Ldate|log.Ltime)
 	errorLog := log.New(os.Stdout, "ERROR\t", log.Ldate|log.Ltime|log.Lshortfile)
