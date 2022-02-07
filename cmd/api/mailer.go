@@ -35,7 +35,7 @@ func (app *application) SendMail(from, to, subject, tmpl string, data interface{
 	}
 
 	htmlMessage := tpl.String()
-	app.infoLog.Printf("%s (htmlMessage): ", logSnippet, htmlMessage)
+	//app.infoLog.Printf("%s (htmlMessage): ", logSnippet, htmlMessage)
 
 	////////////////////////////////////////////////////////////////////////////////
 	// PLAIN TEXT
@@ -54,7 +54,7 @@ func (app *application) SendMail(from, to, subject, tmpl string, data interface{
 	}
 
 	plainMessage := tpl.String()
-	app.infoLog.Printf("%s (plainMessage): ", logSnippet, plainMessage)
+	//app.infoLog.Printf("%s (plainMessage): ", logSnippet, plainMessage)
 
 	////////////////////////////////////////////////////////////////////////////////
 	// CONFIGURE SMTP SERVER

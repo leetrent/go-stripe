@@ -31,6 +31,8 @@ type config struct {
 		username string
 		password string
 	}
+	secretKey   string
+	frontendUrl string
 }
 
 type application struct {
@@ -63,8 +65,8 @@ func main() {
 	flag.StringVar(&cfg.db.dsn, "dsn", "not provided", "DB Connection String")
 
 	// SMTP
-	flag.StringVar(&cfg.smtp.host, "smtphost", "smtp.mailtrap.io", "smtp host")
-	flag.IntVar(&cfg.smtp.port, "smtpport", 587, "smtp port")
+	// flag.StringVar(&cfg.smtp.host, "smtphost", "smtp.mailtrap.io", "smtp host")
+	// flag.IntVar(&cfg.smtp.port, "smtpport", 587, "smtp port")
 
 	flag.Parse()
 
@@ -76,15 +78,15 @@ func main() {
 	infoLog := log.New(os.Stdout, "INFO\t", log.Ldate|log.Ltime)
 	errorLog := log.New(os.Stdout, "ERROR\t", log.Ldate|log.Ltime|log.Lshortfile)
 
-	//////////////////////////////////////////////
+	/////////////////////////////////////////////////////////////////////////////
 	// STRIPE ENVIRONMENT VARIABLES
-	//////////////////////////////////////////////
+	/////////////////////////////////////////////////////////////////////////////
 	cfg.stripe.key = os.Getenv("STRIPE_KEY")
 	cfg.stripe.secret = os.Getenv("STRIPE_SECRET")
 
-	//////////////////////////////////////////////
+	/////////////////////////////////////////////////////////////////////////////
 	// SMTP ENVIRONMENT VARIABLES
-	//////////////////////////////////////////////
+	/////////////////////////////////////////////////////////////////////////////
 	cfg.smtp.host = os.Getenv("SMTP_HOST")
 	smtpPort, err := strconv.Atoi(os.Getenv("SMTP_PORT"))
 	if err != nil {
@@ -93,6 +95,12 @@ func main() {
 	cfg.smtp.port = smtpPort
 	cfg.smtp.username = os.Getenv("SMTP_USERNAME")
 	cfg.smtp.password = os.Getenv("SMTP_PASSWORD")
+
+	/////////////////////////////////////////////////////////////////////////////
+	// CHANGE PASSWORD ENVIRONMENT VARIABLES
+	/////////////////////////////////////////////////////////////////////////////
+	cfg.secretKey = os.Getenv("SECRET_KEY")
+	cfg.frontendUrl = os.Getenv("FRONTEND_URL")
 
 	conn, err := driver.OpenDB(cfg.db.dsn)
 	if err != nil {
