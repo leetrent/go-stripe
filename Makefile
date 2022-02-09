@@ -8,7 +8,7 @@ SMTP_HOST=smtp.mailtrap.io
 SMTP_PORT=587
 SMTP_USERNAME=e1717335a62b27
 SMTP_PASSWORD=ea8e6aa5148a8d
-SECRET_KEY=owieqruoewqiruewoqiruewopq
+SECRET_KEY=TPV7G4yOjIIJvr1plajBkRvlRI0HUUVU
 FRONTEND_URL=http://localhost:4000
 
 ## build: builds all binaries
