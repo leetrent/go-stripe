@@ -344,3 +344,17 @@ func (m *DBModel) Authenticate(email, password string) (int, error) {
 	fmt.Printf("%s Valid password found for %s (userID: %d)", logSnippet, email, id)
 	return id, nil
 }
+
+func (m *DBModel) UpdatePasswordForUser(u User, hash string) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	stmt := `UPDATE users SET password = ? WHERE id = ?`
+	_, err := m.DB.ExecContext(ctx, stmt, hash, u.ID)
+	if err != nil {
+		fmt.Println(err)
+		return err
+	}
+
+	return nil
+}
