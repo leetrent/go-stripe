@@ -11,6 +11,7 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/leetrent/go-stripe/internal/cards"
+	"github.com/leetrent/go-stripe/internal/encryption"
 	"github.com/leetrent/go-stripe/internal/models"
 	"github.com/leetrent/go-stripe/internal/urlsigner"
 	"github.com/stripe/stripe-go/v72"
@@ -553,7 +554,17 @@ func (app *application) ResetPassword(w http.ResponseWriter, r *http.Request) {
 		app.badRequest(w, r, err)
 	}
 
-	user, err := app.DB.GetUserByEmail(payload.Email)
+	encryptor := encryption.Encryption{
+		Key: []byte(app.config.secretKey),
+	}
+
+	decryptedEmail, err := encryptor.Decrypt(payload.Email)
+	if err != nil {
+		app.errorLog.Println(err)
+		app.badRequest(w, r, err)
+	}
+
+	user, err := app.DB.GetUserByEmail(decryptedEmail)
 	if err != nil {
 		app.errorLog.Println(err)
 		app.badRequest(w, r, err)

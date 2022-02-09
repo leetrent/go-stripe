@@ -15,6 +15,9 @@ type Encryption struct {
 }
 
 func (e *Encryption) Encrypt(text string) (string, error) {
+	logSnippet := "[internal][encryption][Encrypt] =>"
+	fmt.Printf("%s (textToEncrypt): '%s'", logSnippet, text)
+
 	plainText := []byte(text)
 
 	block, err := aes.NewCipher(e.Key)
@@ -32,10 +35,15 @@ func (e *Encryption) Encrypt(text string) (string, error) {
 	stream := cipher.NewCFBEncrypter(block, iv)
 	stream.XORKeyStream(cipherText[aes.BlockSize:], plainText)
 
+	fmt.Printf("%s (encryptedText): '%s'", logSnippet, base64.URLEncoding.EncodeToString(cipherText))
+
 	return base64.URLEncoding.EncodeToString(cipherText), nil
 }
 
 func (e *Encryption) Decrypt(encryptedText string) (string, error) {
+	logSnippet := "[internal][encryption][Decrypt] =>"
+	fmt.Printf("%s (encryptedText): '%s'", logSnippet, encryptedText)
+
 	cipherText, err := base64.URLEncoding.DecodeString(encryptedText)
 	if err != nil {
 		fmt.Println(err)
@@ -57,6 +65,8 @@ func (e *Encryption) Decrypt(encryptedText string) (string, error) {
 
 	stream := cipher.NewCFBDecrypter(block, iv)
 	stream.XORKeyStream(cipherText, cipherText)
+
+	fmt.Printf("%s (decryptedText): '%s'", logSnippet, fmt.Sprintf("%s", cipherText))
 
 	return fmt.Sprintf("%s", cipherText), nil
 }
