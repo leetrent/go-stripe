@@ -1,13 +1,16 @@
 package main
 
 import (
+	"fmt"
 	"net/http"
 	"strconv"
 	"time"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/leetrent/go-stripe/internal/cards"
+	"github.com/leetrent/go-stripe/internal/encryption"
 	"github.com/leetrent/go-stripe/internal/models"
+	"github.com/leetrent/go-stripe/internal/urlsigner"
 )
 
 // Home displays the Home page
@@ -341,4 +344,56 @@ func (app *application) Logout(w http.ResponseWriter, r *http.Request) {
 	app.Session.Destroy(r.Context())
 	app.Session.RenewToken(r.Context())
 	http.Redirect(w, r, "/login", http.StatusSeeOther)
+}
+
+func (app *application) ForgotPassword(w http.ResponseWriter, r *http.Request) {
+	if err := app.renderTemplate(w, r, "forgot-password", &templateData{}); err != nil {
+		app.errorLog.Println(err)
+	}
+}
+
+func (app *application) ShowResetPassword(w http.ResponseWriter, r *http.Request) {
+	email := r.URL.Query().Get("email")
+	theURL := r.RequestURI
+	testURL := fmt.Sprintf("%s%s", app.config.frontendUrl, theURL)
+
+	logSnippet := "[web][handlers][ShowResetPassword] =>"
+	app.infoLog.Printf("%s (testURL): %s", logSnippet, testURL)
+
+	signer := urlsigner.Signer{
+		Secret: []byte(app.config.secretKey),
+	}
+
+	valid := signer.VerifyToken(testURL)
+
+	if !valid {
+		errMsg := "Invalid URL - tampering detected."
+		app.errorLog.Println(errMsg)
+		w.Write([]byte(errMsg))
+	}
+
+	expired := signer.Expired(testURL, 60)
+	if expired {
+		app.errorLog.Println("Reset password link has expired.")
+		return
+	}
+
+	encryptor := encryption.Encryption{
+		Key: []byte(app.config.secretKey),
+	}
+
+	encryptedEmail, err := encryptor.Encrypt(email)
+	if err != nil {
+		app.errorLog.Println(err)
+		return
+	}
+
+	data := make(map[string]interface{})
+	data["email"] = encryptedEmail
+
+	if err := app.renderTemplate(w, r, "reset-password", &templateData{
+		Data: data,
+	}); err != nil {
+		app.errorLog.Println(err)
+	}
 }

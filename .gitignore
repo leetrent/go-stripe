@@ -2,5 +2,4 @@ bin/
 tmp/
 dist/
 *.exe
-Makefile
 notesEnvironmentVariables.txt
