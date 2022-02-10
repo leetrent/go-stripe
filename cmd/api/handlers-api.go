@@ -591,5 +591,15 @@ func (app *application) ResetPassword(w http.ResponseWriter, r *http.Request) {
 	resp.Message = "[api][handlers-api] => Password has been changed."
 
 	app.writeJSON(w, http.StatusCreated, resp)
+}
 
+func (app *application) AllSales(w http.ResponseWriter, r *http.Request) {
+	allSales, err := app.DB.GetAllOrders()
+	if err != nil {
+		app.errorLog.Println(err)
+		app.badRequest(w, r, err)
+		return
+	}
+
+	app.writeJSON(w, http.StatusOK, allSales)
 }
