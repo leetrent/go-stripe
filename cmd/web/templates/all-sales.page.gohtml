@@ -37,6 +37,25 @@
         .then(response => response.json())
         .then(function(data) {
             console.log(data);
+            data.forEach(function(ii){
+                let newRow = tbody.insertRow();
+                let newCell = newRow.insertCell();
+                newCell.innerHTML = `<a href="/admin/sales/${ii.id}">Order ${ii.id}</a>`;
+
+                newCell = newRow.insertCell();
+                let item = document.createTextNode(ii.customer.last_name + ", " + ii.customer.first_name);
+                newCell.appendChild(item);
+
+                newCell = newRow.insertCell();
+                item = document.createTextNode(ii.widget.name);
+                newCell.appendChild(item);
+
+                newCell = newRow.insertCell();
+                item = document.createTextNode(ii.transaction.amount);
+                newCell.appendChild(item);
+
+
+            })
         })       
     </script>
 {{end}}
