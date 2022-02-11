@@ -8,5 +8,31 @@
 {{end}}
 
 {{define "js"}}
+    <script>
+        let token = localStorage.getItem("token");
+        let id = window.location.pathname.split("/").pop();
+ 
+        const requestOptions = {
+            method: 'post',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + token,
+            }
+        }
 
+        fetch("{{.API}}/api/admin/get-sale/" + id, requestOptions)
+        .then(response => response.json())
+        .then(function(data) {
+            console.log("data", data)
+        })  
+
+        function formatCurrency(amountInCents) {
+            let amount = parseFloat(amountInCents / 100);
+            return amount.toLocaleString("en-US", {
+                style: "currency",
+                currency: "USD",
+            });
+        }     
+    </script>
 {{end}}

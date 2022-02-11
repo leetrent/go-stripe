@@ -614,3 +614,23 @@ func (app *application) AllSubscriptions(w http.ResponseWriter, r *http.Request)
 
 	app.writeJSON(w, http.StatusOK, allRecurringSales)
 }
+
+func (app *application) GetSale(w http.ResponseWriter, r *http.Request) {
+	id := chi.URLParam(r, "id")
+
+	orderID, err := strconv.Atoi(id)
+	if err != nil {
+		app.errorLog.Println(err)
+		app.badRequest(w, r, err)
+		return
+	}
+
+	order, err := app.DB.GetOrderByID(orderID)
+	if err != nil {
+		app.errorLog.Println(err)
+		app.badRequest(w, r, err)
+		return
+	}
+
+	app.writeJSON(w, http.StatusOK, order)
+}
