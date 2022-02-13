@@ -667,6 +667,16 @@ func (app *application) RefundCharge(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	//////////////////////////////////////////////////////////
+	// UPDATE ORDER STATUS IN DATABASE
+	//////////////////////////////////////////////////////////
+	err = app.DB.UpdateOrderStatus(chargeToRefund.ID, 2)
+	if err != nil {
+		app.errorLog.Println(err)
+		app.badRequest(w, r, errors.New("charge amount was successfully refunded but database could not be updated"))
+		return
+	}
+
 	var resp struct {
 		Error   bool   `json:"error"`
 		Message string `json:"message"`
