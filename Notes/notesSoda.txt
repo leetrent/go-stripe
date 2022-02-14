@@ -28,5 +28,10 @@ $ soda migrate
 
 $ soda generate sql CreateSessionsTable
 
+$ soda generate fizz SeedWidgets
+
+# Reset database:
+$ soda reset
+
 
 

@@ -1,0 +1,89 @@
+{{template "base" .}}
+
+{{define "title"}}All Sales{{end}}
+
+{{define "content"}}
+    <h1 class="h2 mt-5">All Sales</h1>
+    <hr>
+    <table id="sales-table" class="table table-striped">
+        <thead>
+            <tr>
+                <th>Transaction</th>
+                <th>Customer</th>
+                <th>Product</th>
+                <th>Amount</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody>
+        </tbody>
+    </table>
+{{end}}
+
+{{define "js"}}
+    <script>
+        let token = localStorage.getItem("token");
+        let tbody = document.getElementById("sales-table").getElementsByTagName("tbody")[0];
+
+        const requestOptions = {
+            method: 'post',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + token,
+            }
+        }
+
+        fetch("{{.API}}/api/admin/all-sales", requestOptions)
+        .then(response => response.json())
+        .then(function(data) {
+            if (data) {
+                data.forEach(function(ii){
+                    let newRow = tbody.insertRow();
+
+                    // ORDER ID
+                    let newCell = newRow.insertCell();
+                    newCell.innerHTML = `<a href="/admin/sales/${ii.id}">Order ${ii.id}</a>`;
+
+                    // CUSTOMER NAME
+                    newCell = newRow.insertCell();
+                    let item = document.createTextNode(ii.customer.last_name + ", " + ii.customer.first_name);
+                    newCell.appendChild(item);
+
+                    // PRODUCT NAME
+                    newCell = newRow.insertCell();
+                    item = document.createTextNode(ii.widget.name);
+                    newCell.appendChild(item);
+
+                    // AMOUNT CHARGED
+                    let currencyAmount = formatCurrency(ii.transaction.amount);
+                    newCell = newRow.insertCell();
+                    item = document.createTextNode(currencyAmount);
+                    newCell.appendChild(item);
+
+                    // STATUS
+                    newCell = newRow.insertCell();
+                    if (ii.status_id === 1) {
+                        newCell.innerHTML = '<span class="badge bg-success">Charged</span>';
+                    } else {
+                        newCell.innerHTML = '<span class="badge bg-danger">Refunded</span>';
+                    }
+
+                })
+            } else {
+                let newRow = tbody.insertRow();
+                let newCell = newRow.insertCell();
+                newCell.setAttribute("colspan", "4");
+                newCell.innerHTML = "No data available";              
+            }
+        })  
+
+        function formatCurrency(amountInCents) {
+            let amount = parseFloat(amountInCents / 100);
+            return amount.toLocaleString("en-US", {
+                style: "currency",
+                currency: "USD",
+            });
+        }     
+    </script>
+{{end}}
