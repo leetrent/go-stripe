@@ -424,6 +424,7 @@ func (app *application) ShowSale(w http.ResponseWriter, r *http.Request) {
 	stringMap["refund-btn"] = "Refund Order"
 	stringMap["refunded-badge"] = "Refunded"
 	stringMap["refunded-msg"] = "Charge amount refunded"
+	stringMap["status-badge"] = "Charged"
 
 	if err := app.renderTemplate(w, r, "sale", &templateData{
 		StringMap: stringMap,
@@ -440,6 +441,7 @@ func (app *application) ShowSubscription(w http.ResponseWriter, r *http.Request)
 	stringMap["refund-btn"] = "Cancel Subscription"
 	stringMap["refunded-badge"] = "Cancelled"
 	stringMap["refunded-msg"] = "Subscription cancelled"
+	stringMap["status-badge"] = "Subscribed"
 
 	if err := app.renderTemplate(w, r, "sale", &templateData{
 		StringMap: stringMap,
