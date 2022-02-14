@@ -180,18 +180,6 @@ func (app *application) CreateCustomerAndSubscribeToPlan(w http.ResponseWriter, 
 			txnMsg = err.Error()
 			okay = false
 		}
-		// expiryMonth, err := strconv.Atoi(data.ExpiryMonth)
-		// if err != nil {
-		// 	app.errorLog.Println(err)
-		// 	txnMsg = err.Error()
-		// 	okay = false
-		// }
-		// expiryYear, err := strconv.Atoi(data.ExpiryYear)
-		// if err != nil {
-		// 	app.errorLog.Println(err)
-		// 	txnMsg = err.Error()
-		// 	okay = false
-		// }
 
 		txn := models.Transaction{
 			Amount:              amount,
@@ -200,6 +188,8 @@ func (app *application) CreateCustomerAndSubscribeToPlan(w http.ResponseWriter, 
 			ExpiryMonth:         data.ExpiryMonth,
 			ExpiryYear:          data.ExpiryYear,
 			TransactionStatusID: 2,
+			PaymentInent:        subscription.ID,
+			PaymentMethod:       data.PaymentMethod,
 		}
 
 		txnId, err := app.SaveTransaction(txn)
