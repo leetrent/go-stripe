@@ -505,3 +505,97 @@ func (m *DBModel) UpdateOrderStatus(id, statusID int) error {
 
 	return nil
 }
+
+func (m *DBModel) GetAllOrdersPaginated(recurring bool, pageSize, pageNbr int) ([]*Order, int, int, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	offset := (pageNbr - 1) * pageSize
+
+	var orders []*Order
+
+	query := `
+		select
+			o.id, o.widget_id, o.transaction_id, o.customer_id, 
+			o.status_id, o.quantity, o.amount, o.created_at,
+			o.updated_at, w.id, w.name, t.id, t.amount, t.currency,
+			t.last_four, t.expiry_month, t.expiry_year, t.payment_intent,
+			t.bank_return_code, c.id, c.first_name, c.last_name, c.email
+			
+		from
+			orders o
+			left join widgets w on (o.widget_id = w.id)
+			left join transactions t on (o.transaction_id = t.id)
+			left join customers c on (o.customer_id = c.id)
+		where
+			w.is_recurring = ?
+		order by
+			o.created_at desc
+		limit ?
+		offset ?`
+
+	var isRecurring int8 = 0
+	if recurring {
+		isRecurring = 1
+	}
+
+	rows, err := m.DB.QueryContext(ctx, query, isRecurring, pageSize, offset)
+	if err != nil {
+		fmt.Println(err)
+		return nil, 0, 0, err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var o Order
+		err = rows.Scan(
+			&o.ID,
+			&o.WidgetID,
+			&o.TransactionID,
+			&o.CustomerID,
+			&o.StatusID,
+			&o.Quantity,
+			&o.Amount,
+			&o.CreatedAt,
+			&o.UpdatedAt,
+			&o.Widget.ID,
+			&o.Widget.Name,
+			&o.Transaction.ID,
+			&o.Transaction.Amount,
+			&o.Transaction.Currency,
+			&o.Transaction.LastFour,
+			&o.Transaction.ExpiryMonth,
+			&o.Transaction.ExpiryYear,
+			&o.Transaction.PaymentInent,
+			&o.Transaction.BankReturnCode,
+			&o.Customer.ID,
+			&o.Customer.FirstName,
+			&o.Customer.LastName,
+			&o.Customer.Email,
+		)
+		if err != nil {
+			fmt.Println(err)
+			return nil, 0, 0, err
+		}
+
+		orders = append(orders, &o)
+	}
+
+	query = `
+		SELECT COUNT(o.id)
+		FROM orders o
+		LEFT JOIN widgets w ON (o.widget_id = w.id) 
+		WHERE w.is_recurring = ?`
+
+	var totalRecords int
+	countRow := m.DB.QueryRowContext(ctx, query, isRecurring)
+	err = countRow.Scan(&totalRecords)
+	if err != nil {
+		fmt.Println(err)
+		return nil, 0, 0, err
+	}
+
+	lastPage := totalRecords / pageSize
+
+	return orders, lastPage, totalRecords, nil
+}
