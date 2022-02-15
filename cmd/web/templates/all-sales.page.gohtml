@@ -22,61 +22,72 @@
 
 {{define "js"}}
     <script>
-        let token = localStorage.getItem("token");
-        let tbody = document.getElementById("sales-table").getElementsByTagName("tbody")[0];
+        let currentPage = 1;
+        let pageSize = 3;
 
-        const requestOptions = {
-            method: 'post',
-            headers: {
-                'Accept': 'application/json',
-                'Content-Type': 'application/json',
-                'Authorization': 'Bearer ' + token,
+        document.addEventListener("DOMContentLoaded", function() {
+            let token = localStorage.getItem("token");
+            let tbody = document.getElementById("sales-table").getElementsByTagName("tbody")[0];
+
+            let body = {
+                page_size: pageSize,
+                current_page: currentPage,
             }
-        }
 
-        fetch("{{.API}}/api/admin/all-sales", requestOptions)
-        .then(response => response.json())
-        .then(function(data) {
-            if (data) {
-                data.forEach(function(ii){
+            const requestOptions = {
+                method: 'post',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + token,
+                },
+                body: JSON.stringify(body),
+            }
+
+            fetch("{{.API}}/api/admin/all-sales", requestOptions)
+            .then(response => response.json())
+            .then(function(data) {
+                if (data.orders) {
+                    data.orders.forEach(function(ii){
+                        let newRow = tbody.insertRow();
+
+                        // ORDER ID
+                        let newCell = newRow.insertCell();
+                        newCell.innerHTML = `<a href="/admin/sales/${ii.id}">Order ${ii.id}</a>`;
+
+                        // CUSTOMER NAME
+                        newCell = newRow.insertCell();
+                        let item = document.createTextNode(ii.customer.last_name + ", " + ii.customer.first_name);
+                        newCell.appendChild(item);
+
+                        // PRODUCT NAME
+                        newCell = newRow.insertCell();
+                        item = document.createTextNode(ii.widget.name);
+                        newCell.appendChild(item);
+
+                        // AMOUNT CHARGED
+                        let currencyAmount = formatCurrency(ii.transaction.amount);
+                        newCell = newRow.insertCell();
+                        item = document.createTextNode(currencyAmount);
+                        newCell.appendChild(item);
+
+                        // STATUS
+                        newCell = newRow.insertCell();
+                        if (ii.status_id === 1) {
+                            newCell.innerHTML = '<span class="badge bg-success">Charged</span>';
+                        } else {
+                            newCell.innerHTML = '<span class="badge bg-danger">Refunded</span>';
+                        }
+
+                    })
+                } else {
                     let newRow = tbody.insertRow();
-
-                    // ORDER ID
                     let newCell = newRow.insertCell();
-                    newCell.innerHTML = `<a href="/admin/sales/${ii.id}">Order ${ii.id}</a>`;
-
-                    // CUSTOMER NAME
-                    newCell = newRow.insertCell();
-                    let item = document.createTextNode(ii.customer.last_name + ", " + ii.customer.first_name);
-                    newCell.appendChild(item);
-
-                    // PRODUCT NAME
-                    newCell = newRow.insertCell();
-                    item = document.createTextNode(ii.widget.name);
-                    newCell.appendChild(item);
-
-                    // AMOUNT CHARGED
-                    let currencyAmount = formatCurrency(ii.transaction.amount);
-                    newCell = newRow.insertCell();
-                    item = document.createTextNode(currencyAmount);
-                    newCell.appendChild(item);
-
-                    // STATUS
-                    newCell = newRow.insertCell();
-                    if (ii.status_id === 1) {
-                        newCell.innerHTML = '<span class="badge bg-success">Charged</span>';
-                    } else {
-                        newCell.innerHTML = '<span class="badge bg-danger">Refunded</span>';
-                    }
-
-                })
-            } else {
-                let newRow = tbody.insertRow();
-                let newCell = newRow.insertCell();
-                newCell.setAttribute("colspan", "4");
-                newCell.innerHTML = "No data available";              
-            }
-        })  
+                    newCell.setAttribute("colspan", "4");
+                    newCell.innerHTML = "No data available";              
+                }
+            })  
+        });
 
         function formatCurrency(amountInCents) {
             let amount = parseFloat(amountInCents / 100);
