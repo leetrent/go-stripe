@@ -180,18 +180,6 @@ func (app *application) CreateCustomerAndSubscribeToPlan(w http.ResponseWriter, 
 			txnMsg = err.Error()
 			okay = false
 		}
-		// expiryMonth, err := strconv.Atoi(data.ExpiryMonth)
-		// if err != nil {
-		// 	app.errorLog.Println(err)
-		// 	txnMsg = err.Error()
-		// 	okay = false
-		// }
-		// expiryYear, err := strconv.Atoi(data.ExpiryYear)
-		// if err != nil {
-		// 	app.errorLog.Println(err)
-		// 	txnMsg = err.Error()
-		// 	okay = false
-		// }
 
 		txn := models.Transaction{
 			Amount:              amount,
@@ -200,6 +188,8 @@ func (app *application) CreateCustomerAndSubscribeToPlan(w http.ResponseWriter, 
 			ExpiryMonth:         data.ExpiryMonth,
 			ExpiryYear:          data.ExpiryYear,
 			TransactionStatusID: 2,
+			PaymentInent:        subscription.ID,
+			PaymentMethod:       data.PaymentMethod,
 		}
 
 		txnId, err := app.SaveTransaction(txn)
@@ -684,6 +674,57 @@ func (app *application) RefundCharge(w http.ResponseWriter, r *http.Request) {
 
 	resp.Error = false
 	resp.Message = "Charge amount has been successfully refunded"
+
+	app.writeJSON(w, http.StatusOK, resp)
+}
+
+func (app *application) CancelSubscription(w http.ResponseWriter, r *http.Request) {
+	var subToCancel struct {
+		ID            int    `json:"id"`
+		PaymentIntent string `json:"pi"`
+		Currency      string `json:"currency"`
+	}
+
+	err := app.readJSON(w, r, &subToCancel)
+	if err != nil {
+		app.errorLog.Println(err)
+		app.badRequest(w, r, err)
+		return
+	}
+
+	card := cards.Card{
+		Secret:   app.config.stripe.secret,
+		Key:      app.config.stripe.key,
+		Currency: subToCancel.Currency,
+	}
+
+	/////////////////////////////////////////////////////////////
+	// PaymentIntent is holding subcription id for subscriptions
+	/////////////////////////////////////////////////////////////
+	err = card.CancelSubscription(subToCancel.PaymentIntent)
+	if err != nil {
+		app.errorLog.Println(err)
+		app.badRequest(w, r, err)
+		return
+	}
+
+	//////////////////////////////////////////////////////////
+	// UPDATE ORDER STATUS IN DATABASE
+	//////////////////////////////////////////////////////////
+	err = app.DB.UpdateOrderStatus(subToCancel.ID, 3)
+	if err != nil {
+		app.errorLog.Println(err)
+		app.badRequest(w, r, errors.New("subscription was successfully cancelled but database could not be updated"))
+		return
+	}
+
+	var resp struct {
+		Error   bool   `json:"error"`
+		Message string `json:"message"`
+	}
+
+	resp.Error = false
+	resp.Message = "Subscription cancelled"
 
 	app.writeJSON(w, http.StatusOK, resp)
 }
