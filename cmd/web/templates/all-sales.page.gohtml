@@ -18,12 +18,30 @@
         <tbody>
         </tbody>
     </table>
+    <nav>
+        <ul id="paginator" class="pagination">
+        
+        </ul>
+    
+    </nav>
 {{end}}
 
 {{define "js"}}
     <script>
 let currentPage = 1;
 let pageSize = 3;
+
+        function paginator(pages, curPage) {
+            let p = document.getElementById("paginator");
+            
+            let html = `<li class="page-item"><a href="#!" class="page-link pager" data-page="${curPage - 1}">&lt;</a></li>`;
+            for (var ii = 0; ii <= pages; ii++) {
+                html += `<li class="page-item"><a href="#!" class="page-link pager" data-page="${ii + 1}">${ii + 1}</a></li>`;
+            }
+            html += `<li class="page-item"><a href="#!" class="page-link pager" data-page="${curPage + 1}">&gt;</a></li>`;
+
+            p.innerHTML = html;
+        }
 
         function updateTable(ps, cp) {
             let token = localStorage.getItem("token");
@@ -78,8 +96,8 @@ let pageSize = 3;
                         } else {
                             newCell.innerHTML = '<span class="badge bg-danger">Refunded</span>';
                         }
-
                     })
+                    paginator(data.last_page, data.current_page);
                 } else {
                     let newRow = tbody.insertRow();
                     let newCell = newRow.insertCell();
