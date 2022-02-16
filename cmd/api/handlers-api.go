@@ -596,6 +596,7 @@ func (app *application) AllSales(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	fmt.Println("")
 	logSnippet := "\n[api][handlers-api][AllSales] =>"
 	fmt.Printf("%s (payload.PageSize)....: %d", logSnippet, payload.PageSize)
 	fmt.Printf("%s (payload.CurrentPage).: %d", logSnippet, payload.CurrentPage)
