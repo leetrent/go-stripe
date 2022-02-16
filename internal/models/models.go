@@ -506,11 +506,16 @@ func (m *DBModel) UpdateOrderStatus(id, statusID int) error {
 	return nil
 }
 
-func (m *DBModel) GetAllOrdersPaginated(recurring bool, pageSize, pageNbr int) ([]*Order, int, int, error) {
+func (m *DBModel) GetAllOrdersPaginated(recurring bool, pageSize, page int) ([]*Order, int, int, error) {
+	logSnippet := "\n[internal][models][GetAllOrdersPaginated] =>"
+	fmt.Printf("%s (pageSize): %d", logSnippet, pageSize)
+	fmt.Printf("%s (page)....: %d", logSnippet, page)
+
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 
-	offset := (pageNbr - 1) * pageSize
+	offset := (page - 1) * pageSize
+	fmt.Printf("%s (offset)..: %d", logSnippet, offset)
 
 	var orders []*Order
 
@@ -596,6 +601,10 @@ func (m *DBModel) GetAllOrdersPaginated(recurring bool, pageSize, pageNbr int) (
 	}
 
 	lastPage := totalRecords / pageSize
+
+	fmt.Printf("%s (len(orders)).: %d", logSnippet, len(orders))
+	fmt.Printf("%s (totalRecords): %d", logSnippet, totalRecords)
+	fmt.Printf("%s (lastPage)....: %d", logSnippet, lastPage)
 
 	return orders, lastPage, totalRecords, nil
 }

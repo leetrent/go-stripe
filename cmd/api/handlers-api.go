@@ -596,7 +596,11 @@ func (app *application) AllSales(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	allNonRecurringSales, lastPage, totalRecords, err := app.DB.GetAllOrdersPaginated(false, 2, 1)
+	logSnippet := "\n[api][handlers-api][AllSales] =>"
+	fmt.Printf("%s (payload.PageSize)....: %d", logSnippet, payload.PageSize)
+	fmt.Printf("%s (payload.CurrentPage).: %d", logSnippet, payload.CurrentPage)
+
+	allNonRecurringSales, lastPage, totalRecords, err := app.DB.GetAllOrdersPaginated(false, payload.PageSize, payload.CurrentPage)
 	if err != nil {
 		app.errorLog.Println(err)
 		app.badRequest(w, r, err)
@@ -611,7 +615,7 @@ func (app *application) AllSales(w http.ResponseWriter, r *http.Request) {
 		Orders       []*models.Order `json:"orders"`
 	}
 
-	resp.CurrentPage = 1
+	resp.CurrentPage = payload.CurrentPage
 	resp.PageSize = payload.PageSize
 	resp.LastPage = lastPage
 	resp.TotalRecords = totalRecords

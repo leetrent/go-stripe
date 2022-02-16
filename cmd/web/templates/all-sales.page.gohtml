@@ -29,7 +29,7 @@
 {{define "js"}}
     <script>
 let currentPage = 1;
-let pageSize = 3;
+let pageSize = 7;
 
         function paginator(pages, curPage) {
             let p = document.getElementById("paginator");
@@ -44,13 +44,18 @@ let pageSize = 3;
         }
 
         function updateTable(ps, cp) {
+            console.log("[updateTable] => (ps):", ps);
+            console.log("[updateTable] => (cp):", cp);
+            
             let token = localStorage.getItem("token");
             let tbody = document.getElementById("sales-table").getElementsByTagName("tbody")[0];
 
             let body = {
                 page_size: ps,
-                current_page: cp,
+                page: cp,
             }
+
+            console.log("[body] => (body):", body);
 
             const requestOptions = {
                 method: 'post',
