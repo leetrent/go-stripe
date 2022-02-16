@@ -587,10 +587,14 @@ func (m *DBModel) GetAllOrdersPaginated(recurring bool, pageSize, page int) ([]*
 	}
 
 	query = `
-		SELECT COUNT(o.id)
-		FROM orders o
-		LEFT JOIN widgets w ON (o.widget_id = w.id) 
-		WHERE w.is_recurring = ?`
+		SELECT 
+			COUNT(o.id)
+		FROM 
+			orders o
+		LEFT JOIN 
+			widgets w ON (o.widget_id = w.id) 
+		WHERE 
+			w.is_recurring = ?`
 
 	var totalRecords int
 	countRow := m.DB.QueryRowContext(ctx, query, isRecurring)

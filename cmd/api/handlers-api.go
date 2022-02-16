@@ -625,15 +625,57 @@ func (app *application) AllSales(w http.ResponseWriter, r *http.Request) {
 	app.writeJSON(w, http.StatusOK, resp)
 }
 
+// func (app *application) AllSubscriptions(w http.ResponseWriter, r *http.Request) {
+// 	allRecurringSales, err := app.DB.GetAllOrders(true)
+// 	if err != nil {
+// 		app.errorLog.Println(err)
+// 		app.badRequest(w, r, err)
+// 		return
+// 	}
+
+// 	app.writeJSON(w, http.StatusOK, allRecurringSales)
+// }
+
 func (app *application) AllSubscriptions(w http.ResponseWriter, r *http.Request) {
-	allRecurringSales, err := app.DB.GetAllOrders(true)
+	var payload struct {
+		PageSize    int `json:"page_size"`
+		CurrentPage int `json:"page"`
+	}
+
+	err := app.readJSON(w, r, &payload)
 	if err != nil {
 		app.errorLog.Println(err)
 		app.badRequest(w, r, err)
 		return
 	}
 
-	app.writeJSON(w, http.StatusOK, allRecurringSales)
+	fmt.Println("")
+	logSnippet := "\n[api][handlers-api][AllSubscriptions] =>"
+	fmt.Printf("%s (payload.PageSize)....: %d", logSnippet, payload.PageSize)
+	fmt.Printf("%s (payload.CurrentPage).: %d", logSnippet, payload.CurrentPage)
+
+	allNonRecurringSales, lastPage, totalRecords, err := app.DB.GetAllOrdersPaginated(true, payload.PageSize, payload.CurrentPage)
+	if err != nil {
+		app.errorLog.Println(err)
+		app.badRequest(w, r, err)
+		return
+	}
+
+	var resp struct {
+		CurrentPage  int             `json:"current_page"`
+		PageSize     int             `json:"page_size"`
+		LastPage     int             `json:"last_page"`
+		TotalRecords int             `json:"total_records"`
+		Orders       []*models.Order `json:"orders"`
+	}
+
+	resp.CurrentPage = payload.CurrentPage
+	resp.PageSize = payload.PageSize
+	resp.LastPage = lastPage
+	resp.TotalRecords = totalRecords
+	resp.Orders = allNonRecurringSales
+
+	app.writeJSON(w, http.StatusOK, resp)
 }
 
 func (app *application) GetSale(w http.ResponseWriter, r *http.Request) {
