@@ -40,13 +40,29 @@
             fetch("{{.API}}/api/admin/all-users", requestOptions)
             .then(response => response.json())
             .then(function(data) {
-                console.log(data);
-            
-            })
+                if (data) {
+                    data.forEach(function(ii) {
+                        let newRow = tbody.insertRow();
 
+                        // USER NAME
+                        let newCell = newRow.insertCell();
+                        newCell.innerHTML = `<a href="/admin/all-users/${ii.id}">${ii.last_name}, ${ii.first_name}</a>`;
+
+                        // USER EMAIL
+                        newCell = newRow.insertCell();
+                        let item = document.createTextNode(ii.email);
+                        newCell.appendChild(item);
+
+                    })
+                } else {
+                     let newRow = tbody.insertRow();
+                     let newCell = newRow.insertCell();
+                     newCell.setAttribute("colspan", "2");
+                     newCell.innerHTML = "No data available";              
+                }       
+            })
         });
         
-
     </script>
 {{end}}
 
