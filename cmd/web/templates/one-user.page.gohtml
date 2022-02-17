@@ -5,6 +5,66 @@
 {{define "content"}}
     <h1 class="h2 mt-5">Admin User</h1>
     <hr>
+    <form 
+        method="POST" 
+        action="" 
+        id="user_form" 
+        name="user_form"
+        class="needs-validation"
+        autocomplete="off"
+        novalidate="">
+
+        <div class="mb-3">
+            <label for="first_name" class="form-label">First Name:</label>
+            <input
+                type="text"
+                class="form-control"
+                id="first_name"
+                name="first_name"
+                required=""
+                autocomplete="first_name-new">
+        </div>
+        <div class="mb-3">
+            <label for="last_name" class="form-label">Last Name:</label>
+            <input
+                type="text"
+                class="form-control"
+                id="last_name"
+                name="last_name"
+                required=""
+                autocomplete="last_name-new">
+        </div>
+        <div class="mb-3">
+            <label for="email" class="form-label">Email:</label>
+            <input
+                type="email"
+                class="form-control"
+                id="email"
+                name="email"
+                required=""
+                autocomplete="email-new">
+        </div>
+        <div class="mb-3">
+            <label for="password" class="form-label">Password:</label>
+            <input
+                type="password"
+                class="form-control"
+                id="password"
+                name="password"
+                autocomplete="password-new">
+        </div>
+        <div class="mb-3">
+            <label for="verify_password" class="form-label">Verify Password:</label>
+            <input
+                type="password"
+                class="form-control"
+                id="verify_password"
+                name="verify_password"
+                autocomplete="verify_password-new">
+        </div>
+    
+    
+    </form>
 {{end}}
 
 {{define "js"}}
