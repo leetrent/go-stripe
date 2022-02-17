@@ -612,3 +612,144 @@ func (m *DBModel) GetAllOrdersPaginated(recurring bool, pageSize, page int) ([]*
 
 	return orders, lastPage, totalRecords, nil
 }
+
+func (m *DBModel) GetAllUsers() ([]*User, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	var users []*User
+
+	query :=
+		`select
+			id, last_name, first_name, email, created_at, updated_at
+		from
+			users
+		order by
+			last_name, first_name`
+
+	rows, err := m.DB.QueryContext(ctx, query)
+	if err != nil {
+		fmt.Println(err)
+		return nil, err
+	}
+
+	for rows.Next() {
+		var u User
+		err = rows.Scan(
+			&u.ID,
+			&u.LastName,
+			&u.FirstName,
+			&u.Email,
+			&u.CreatedAt,
+			&u.UpdatedAt,
+		)
+		if err != nil {
+			fmt.Println(err)
+			return nil, err
+		}
+		users = append(users, &u)
+	}
+	return users, nil
+}
+
+func (m *DBModel) GetOneUser(id int) (User, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	query :=
+		`select
+			id, last_name, first_name, email, created_at, updated_at
+		from
+			users
+		where
+			id = ?`
+
+	row := m.DB.QueryRowContext(ctx, query, id)
+
+	var u User
+	err := row.Scan(
+		&u.ID,
+		&u.LastName,
+		&u.FirstName,
+		&u.Email,
+		&u.CreatedAt,
+		&u.UpdatedAt,
+	)
+	if err != nil {
+		fmt.Println(err)
+		return u, err
+	}
+
+	return u, nil
+}
+
+func (m *DBModel) EditUser(u User) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	stmt := `
+		UPDATE users SET
+			first_name = ?,
+			last_name  = ?,
+			email      = ?,
+			updated_at = ?
+		WHERE
+			id = ?`
+
+	_, err := m.DB.ExecContext(ctx, stmt, u.FirstName, u.LastName, u.Email, u.UpdatedAt)
+	if err != nil {
+		fmt.Println(err)
+		return err
+	}
+
+	return nil
+}
+
+func (m *DBModel) InsertUser(u User, hash string) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	stmt := `
+		INSERT INTO users
+		(
+			first_name,
+			last_name,
+			email,
+			password,
+			created_at,
+			updated_at
+		)
+		VALUES (?, ?, ?, ?, ?, ?)`
+
+	_, err := m.DB.ExecContext(
+		ctx,
+		stmt,
+		u.FirstName,
+		u.LastName,
+		u.Email,
+		hash,
+		time.Now(),
+		time.Now(),
+	)
+
+	if err != nil {
+		fmt.Println(err)
+		return err
+	}
+
+	return nil
+}
+
+func (m *DBModel) DeleteUser(id int) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	stmt := `DELETE FROM users WHERE id = ?`
+
+	_, err := m.DB.ExecContext(ctx, stmt, id)
+	if err != nil {
+		fmt.Println(err)
+		return err
+	}
+	return nil
+}
