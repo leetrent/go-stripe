@@ -696,7 +696,7 @@ func (m *DBModel) EditUser(u User) error {
 		WHERE
 			id = ?`
 
-	_, err := m.DB.ExecContext(ctx, stmt, u.FirstName, u.LastName, u.Email, u.UpdatedAt)
+	_, err := m.DB.ExecContext(ctx, stmt, u.FirstName, u.LastName, u.Email, u.UpdatedAt, u.ID)
 	if err != nil {
 		fmt.Println(err)
 		return err
