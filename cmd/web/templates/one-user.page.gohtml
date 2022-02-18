@@ -74,6 +74,32 @@
 {{end}}
 
 {{define "js"}}
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            let token = localStorage.getItem("token");
+            let id = window.location.pathname.split("/").pop();
+
+            console.log("token", token);
+            console.log("id", id);
+
+            const requestOptions = {
+                method: 'post',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + token,
+                },
+            }
+
+            let url = '{{.API}}/api/admin/all-users/' + id;
+            console.log("url", url);
+            fetch(url, requestOptions)
+            .then(response => response.json())
+            .then(function(data) {
+                console.log(data);
+            })
+        });
+    </script>
 
 {{end}}
 
