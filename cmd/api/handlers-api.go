@@ -831,3 +831,74 @@ func (app *application) OneUser(w http.ResponseWriter, r *http.Request) {
 
 	app.writeJSON(w, http.StatusOK, user)
 }
+
+func (app *application) EditUser(w http.ResponseWriter, r *http.Request) {
+	id := chi.URLParam(r, "id")
+
+	userID, err := strconv.Atoi(id)
+	if err != nil {
+		app.errorLog.Println(err)
+		app.badRequest(w, r, err)
+		return
+	}
+
+	var user models.User
+	err = app.readJSON(w, r, &user)
+	if err != nil {
+		app.errorLog.Println(err)
+		app.badRequest(w, r, err)
+		return
+	}
+
+	if userID > 0 {
+		err = app.DB.EditUser(user)
+		if err != nil {
+			app.errorLog.Println(err)
+			app.badRequest(w, r, err)
+			return
+		}
+
+		if user.Password != "" {
+			newHash, err := bcrypt.GenerateFromPassword([]byte(user.Password), 12)
+			if err != nil {
+				app.errorLog.Println(err)
+				app.badRequest(w, r, err)
+				return
+			}
+			err = app.DB.UpdatePasswordForUser(user, string(newHash))
+			if err != nil {
+				app.errorLog.Println(err)
+				app.badRequest(w, r, err)
+				return
+			}
+		}
+
+	} else {
+		newHash, err := bcrypt.GenerateFromPassword([]byte(user.Password), 12)
+		if err != nil {
+			app.errorLog.Println(err)
+			app.badRequest(w, r, err)
+			return
+		}
+		err = app.DB.InsertUser(user, string(newHash))
+		if err != nil {
+			app.errorLog.Println(err)
+			app.badRequest(w, r, err)
+			return
+		}
+	}
+
+	var resp struct {
+		Error   bool   `json:"error"`
+		Message string `json:"message"`
+	}
+
+	resp.Error = false
+	if userID > 0 {
+		resp.Message = user.FirstName + " " + user.LastName + " was successfully updated."
+	} else {
+		resp.Message = "New user (" + user.FirstName + " " + user.LastName + ") was successfully added."
+	}
+
+	app.writeJSON(w, http.StatusOK, resp)
+}
