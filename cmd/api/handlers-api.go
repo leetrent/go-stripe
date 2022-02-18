@@ -902,3 +902,30 @@ func (app *application) EditUser(w http.ResponseWriter, r *http.Request) {
 
 	app.writeJSON(w, http.StatusOK, resp)
 }
+
+func (app *application) DeleteUser(w http.ResponseWriter, r *http.Request) {
+	id := chi.URLParam(r, "id")
+	userID, err := strconv.Atoi(id)
+	if err != nil {
+		app.errorLog.Println(err)
+		app.badRequest(w, r, err)
+		return
+	}
+
+	err = app.DB.DeleteUser(userID)
+	if err != nil {
+		app.errorLog.Println(err)
+		app.badRequest(w, r, err)
+		return
+	}
+
+	var resp struct {
+		Error   bool   `json:"error"`
+		Message string `json:"message"`
+	}
+
+	resp.Error = false
+	resp.Message = "User #" + id + " was successfully deleted."
+
+	app.writeJSON(w, http.StatusOK, resp)
+}

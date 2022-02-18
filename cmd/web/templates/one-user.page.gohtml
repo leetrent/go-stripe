@@ -124,9 +124,27 @@
                 confirmButtonText: 'Delete User'
                 })
                 .then((result) => {   
-                    console.log("Would delete user with ID:", id);
+                    if (result.isConfirmed) {
+                        const requestOptions = {
+                            method: 'post',
+                            headers: {
+                                'Accept': 'application/json',
+                                'Content-Type': 'application/json',
+                                'Authorization': 'Bearer ' + token,
+                            }
+                        }  
+                        fetch("{{.API}}/api/admin/all-users/delete/" + id, requestOptions)
+                        .then(response => response.json())
+                        .then(function(data) {
+                            if (data.error) {
+                                Swal.fire("Error: " + data.message);
+                            } else {
+                                location.href = "/admin/all-users";
+                            }
+                        })
+                    }
                 })     
-        })
+            })
 
         function val() {
             let form = document.getElementById("user_form");
