@@ -76,14 +76,14 @@
       {{if eq .IsAuthenticated 1}}
         let socket;
         document.addEventListener("DOMContentLoaded", function() {
-          socket = new WebSocket("ws:/localhost:4000/ws");
+          socket = new WebSocket("ws://localhost:4000/ws");
           socket.onopen = () => {
             console.log("Successfully connected to websockets");
           }
           socket.onclose = event => {
             console.log("Socket onClose event");
           }  
-          socket.onerror = event => {
+          socket.onerror = error => {
             console.log("Socket onError event");
           }  
           socket.onmessage = msg => {
