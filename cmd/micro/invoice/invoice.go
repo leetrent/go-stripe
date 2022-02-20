@@ -64,6 +64,11 @@ func main() {
 		version:  version,
 	}
 
+	//////////////////////////////////////////////////
+	// CREATE PDF OUTPUT DIRECTORY IF IT DOESN'T EXIST
+	//////////////////////////////////////////////////
+	app.CreateDirIfNotExists("./invoices")
+
 	err = app.serve()
 	if err != nil {
 		log.Fatal(err)
