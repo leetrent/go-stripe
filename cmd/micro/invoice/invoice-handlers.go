@@ -23,13 +23,27 @@ type Order struct {
 func (app *application) CreateAndSendInvoice(w http.ResponseWriter, r *http.Request) {
 	// READ JSON INPUT
 	var order Order
-	err := app.readJSON(w, r, &order)
+	order.ID = 100
+	order.Email = "me@here.com"
+	order.FirstName = "John"
+	order.LastName = "Smith"
+	order.Quantity = 1
+	order.Amount = 1000
+	order.Product = "Widget"
+	order.CreatedAt = time.Now()
+
+	// err := app.readJSON(w, r, &order)
+	// if err != nil {
+	// 	app.badRequest(w, r, err)
+	// 	return
+	// }
+
+	// GENERATE INVOICE PDF
+	err := app.createInvoicePDF(order)
 	if err != nil {
 		app.badRequest(w, r, err)
 		return
 	}
-
-	// GENERATE INVOICE PDF
 
 	// SEND MAIL WITH PDF ATTACHMENT
 
@@ -58,7 +72,7 @@ func (app *application) createInvoicePDF(order Order) error {
 	// SETUP FOR TOP OF PDF
 	pdf.SetY(50)
 	pdf.SetX(10)
-	pdf.SetFont("Time", "", 11)
+	pdf.SetFont("Times", "", 11)
 
 	// WRITE NAME
 	pdf.CellFormat(97, 8, fmt.Sprintf("Attention: %s %s", order.FirstName, order.LastName), "", 0, "L", false, 0, "")
