@@ -21,25 +21,20 @@ type Order struct {
 }
 
 func (app *application) CreateAndSendInvoice(w http.ResponseWriter, r *http.Request) {
+	logSnippet := ("[micro][invoice][handlers][CreateAndSendInvoice] =>")
+	app.infoLog.Printf("%s ", logSnippet)
+
 	// READ JSON INPUT
 	var order Order
-	order.ID = 100
-	order.Email = "me@here.com"
-	order.FirstName = "John"
-	order.LastName = "Smith"
-	order.Quantity = 1
-	order.Amount = 1000
-	order.Product = "Widget"
-	order.CreatedAt = time.Now()
 
-	// err := app.readJSON(w, r, &order)
-	// if err != nil {
-	// 	app.badRequest(w, r, err)
-	// 	return
-	// }
+	err := app.readJSON(w, r, &order)
+	if err != nil {
+		app.badRequest(w, r, err)
+		return
+	}
 
 	// GENERATE INVOICE PDF
-	err := app.createInvoicePDF(order)
+	err = app.createInvoicePDF(order)
 	if err != nil {
 		app.badRequest(w, r, err)
 		return
@@ -69,6 +64,9 @@ func (app *application) CreateAndSendInvoice(w http.ResponseWriter, r *http.Requ
 }
 
 func (app *application) createInvoicePDF(order Order) error {
+	logSnippet := ("[micro][invoice][handlers][createInvoicePDF] =>")
+	app.infoLog.Printf("%s ", logSnippet)
+
 	pdf := gofpdf.New("P", "mm", "Letter", "")
 	pdf.SetMargins(10, 13, 10) // in milimeters
 	pdf.SetAutoPageBreak(true, 0)

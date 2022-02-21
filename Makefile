@@ -10,6 +10,7 @@ SMTP_USERNAME=e1717335a62b27
 SMTP_PASSWORD=ea8e6aa5148a8d
 SECRET_KEY=TPV7G4yOjIIJvr1plajBkRvlRI0HUUVU
 FRONTEND_URL=http://localhost:4000
+INVOICE_URL=http://localhost:5000/invoice/create-and-send
 
 ## build: builds all binaries
 build: clean build_front build_back
@@ -46,7 +47,7 @@ start: start_front start_back start_invoice
 ## start_front: starts the front end
 start_front: build_front
 	@echo Starting the front end...
-	set STRIPE_KEY=${STRIPE_KEY}&& set STRIPE_SECRET=${STRIPE_SECRET}&& set SECRET_KEY=${SECRET_KEY}&& set FRONTEND_URL=${FRONTEND_URL}&& start /B .\dist\gostripe.exe -dsn=${DSN}
+	set STRIPE_KEY=${STRIPE_KEY}&& set STRIPE_SECRET=${STRIPE_SECRET}&& set SECRET_KEY=${SECRET_KEY}&& set FRONTEND_URL=${FRONTEND_URL}&& set INVOICE_URL=${INVOICE_URL}&& start /B .\dist\gostripe.exe -dsn=${DSN}
 	@echo Front end running!
 
 ## start_back: starts the back end
