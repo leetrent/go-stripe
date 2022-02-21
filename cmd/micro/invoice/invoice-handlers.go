@@ -45,7 +45,17 @@ func (app *application) CreateAndSendInvoice(w http.ResponseWriter, r *http.Requ
 		return
 	}
 
+	// CREATE MAIL ATTACHMENT
+	attachments := []string{
+		fmt.Sprintf("./invoices/%d.pdf", order.ID),
+	}
+
 	// SEND MAIL WITH PDF ATTACHMENT
+	err = app.SendMail("info@widgets.com", order.Email, "Your invoice", "invoice", attachments, nil)
+	if err != nil {
+		app.badRequest(w, r, err)
+		return
+	}
 
 	// SEND HTTP RESPONSE
 	var resp struct {
