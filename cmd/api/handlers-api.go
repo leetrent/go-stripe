@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -114,6 +115,17 @@ func (app *application) GetWidgetByID(w http.ResponseWriter, r *http.Request) {
 	w.Write(out)
 }
 
+type Invoice struct {
+	ID        int       `json:"id"`
+	Quantity  int       `json:"quantity"`
+	Amount    int       `json:"amount"`
+	Product   string    `json:"product"`
+	FirstName string    `json:"first_name"`
+	LastName  string    `json:"last_name"`
+	Email     string    `json:"email"`
+	CreatedAt time.Time `json:"created_at"`
+}
+
 func (app *application) CreateCustomerAndSubscribeToPlan(w http.ResponseWriter, r *http.Request) {
 	var data stripePayload
 	var subscription *stripe.Subscription
@@ -222,6 +234,24 @@ func (app *application) CreateCustomerAndSubscribeToPlan(w http.ResponseWriter, 
 		}
 		app.infoLog.Println("[api][handlers-api][CreateCustomerAndSubscribeToPlan] => (orderID):", orderID)
 
+		////////////////////////////////////////////////////////
+		// CALL MICROSERVICE TO GENERATE AND MAIL INVOICE AS PDF
+		////////////////////////////////////////////////////////
+		inv := Invoice{
+			ID:        orderID,
+			Amount:    2000,
+			Product:   "Bronze Plan Monthly Subscription",
+			Quantity:  order.Quantity,
+			FirstName: data.FirstName,
+			LastName:  data.LastName,
+			Email:     data.Email,
+			CreatedAt: time.Now(),
+		}
+		err = app.callInvoiceMicro(inv)
+		if err != nil {
+			app.errorLog.Println(err)
+			// Keep going, even if there's an error.
+		}
 	}
 
 	resp :=
@@ -928,4 +958,34 @@ func (app *application) DeleteUser(w http.ResponseWriter, r *http.Request) {
 	resp.Message = "User #" + id + " was successfully deleted."
 
 	app.writeJSON(w, http.StatusOK, resp)
+}
+
+func (app *application) callInvoiceMicro(inv Invoice) error {
+	logSnippet := ("[api][handlers-api][callInvoiceMicro] =>")
+	app.infoLog.Printf("%s (app.config.invoiceUrl): '%s'", logSnippet, app.config.invoiceUrl)
+
+	out, err := json.MarshalIndent(inv, "", "\t")
+	if err != nil {
+		app.errorLog.Println(err)
+		return err
+	}
+
+	req, err := http.NewRequest("POST", app.config.invoiceUrl, bytes.NewBuffer(out))
+	if err != nil {
+		app.errorLog.Println(err)
+		return err
+	}
+	req.Header.Set("Content-Type", "application/json")
+
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		app.errorLog.Println(err)
+		return err
+	}
+
+	defer resp.Body.Close()
+	app.infoLog.Println(resp.Body)
+
+	return nil
 }

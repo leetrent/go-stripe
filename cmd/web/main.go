@@ -34,6 +34,7 @@ type config struct {
 	}
 	secretKey   string
 	frontendUrl string
+	invoiceUrl  string
 }
 
 type application struct {
@@ -83,6 +84,11 @@ func main() {
 	/////////////////////////////////////////////////////////////////////////////
 	cfg.secretKey = os.Getenv("SECRET_KEY")
 	cfg.frontendUrl = os.Getenv("FRONTEND_URL")
+
+	/////////////////////////////////////////////////////////////////////////////
+	// INVOICE MICROSERVICE URL
+	/////////////////////////////////////////////////////////////////////////////
+	cfg.invoiceUrl = os.Getenv("INVOICE_URL")
 
 	infoLog := log.New(os.Stdout, "INFO\t", log.Ldate|log.Ltime)
 	errorLog := log.New(os.Stdout, "ERROR\t", log.Ldate|log.Ltime|log.Lshortfile)
