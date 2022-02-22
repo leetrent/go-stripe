@@ -33,6 +33,7 @@ type config struct {
 	}
 	secretKey   string
 	frontendUrl string
+	invoiceUrl  string
 }
 
 type application struct {
@@ -101,6 +102,11 @@ func main() {
 	/////////////////////////////////////////////////////////////////////////////
 	cfg.secretKey = os.Getenv("SECRET_KEY")
 	cfg.frontendUrl = os.Getenv("FRONTEND_URL")
+
+	/////////////////////////////////////////////////////////////////////////////
+	// INVOICE MICROSERVICE URL
+	/////////////////////////////////////////////////////////////////////////////
+	cfg.invoiceUrl = os.Getenv("INVOICE_URL")
 
 	conn, err := driver.OpenDB(cfg.db.dsn)
 	if err != nil {

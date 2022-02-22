@@ -53,7 +53,7 @@ start_front: build_front
 ## start_back: starts the back end
 start_back: build_back
 	@echo Starting the back end...
-	set STRIPE_KEY=${STRIPE_KEY}&& set STRIPE_SECRET=${STRIPE_SECRET}&& set SMTP_HOST=${SMTP_HOST}&& set SMTP_PORT=${SMTP_PORT}&& set SMTP_USERNAME=${SMTP_USERNAME}&& set SMTP_PASSWORD=${SMTP_PASSWORD}&& set SECRET_KEY=${SECRET_KEY}&& set FRONTEND_URL=${FRONTEND_URL}&& start /B .\dist\gostripe_api.exe -dsn=${DSN}
+	set STRIPE_KEY=${STRIPE_KEY}&& set STRIPE_SECRET=${STRIPE_SECRET}&& set SMTP_HOST=${SMTP_HOST}&& set SMTP_PORT=${SMTP_PORT}&& set SMTP_USERNAME=${SMTP_USERNAME}&& set SMTP_PASSWORD=${SMTP_PASSWORD}&& set SECRET_KEY=${SECRET_KEY}&& set FRONTEND_URL=${FRONTEND_URL}&& set INVOICE_URL=${INVOICE_URL}&& start /B .\dist\gostripe_api.exe -dsn=${DSN}
 	@echo Back end running!
 
 ## start_invoice: starts the invoice microservice
